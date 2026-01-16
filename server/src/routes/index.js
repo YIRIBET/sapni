@@ -1,0 +1,18 @@
+const express = require('express');
+const clientsRoutes = require('./clientsRoutes');
+//const campaignsRoutes = require('./campaignsRoutes');
+//const diffusionOrdersRoutes = require('./diffusionOrdersRoutes');
+//const evidenceRecordsRoutes = require('./evidenceRecordsRoutes');
+//const usersRoutes = require('./usersRoutes');
+//const mediaChannelsRoutes = require('./mediaChannelsRoutes');
+//
+const router = express.Router();
+//
+router.use('/clients', clientsRoutes);
+//router.use('/campaigns', campaignsRoutes);
+//router.use('/diffusion-orders', diffusionOrdersRoutes);
+//router.use('/evidence-records', evidenceRecordsRoutes);
+//router.use('/users', usersRoutes);
+//router.use('/media-channels', mediaChannelsRoutes);
+
+module.exports = router;
