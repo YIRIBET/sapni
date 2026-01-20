@@ -2,14 +2,16 @@ const express = require('express');
 const clientsController = require('../controllers/clientsController');
 const validateRequest = require('../middlewares/validateRequest');
 const { createClientSchema, updateClientSchema, idParamSchema } = require('../validators/clientValidator');
+const { authenticate } = require('../middlewares/authMiddleware');
+const { authorize } = require("../middlewares/requireMedia");
 
 const router = express.Router();
 
-router.get('/', clientsController.getAll.bind(clientsController));
-router.get('/:id', validateRequest(idParamSchema, 'params'), clientsController.getById.bind(clientsController));
-router.post('/', validateRequest(createClientSchema), clientsController.create.bind(clientsController));
-router.put('/:id', validateRequest(idParamSchema, 'params'), validateRequest(updateClientSchema), clientsController.update.bind(clientsController));
-router.delete('/:id', validateRequest(idParamSchema, 'params'), clientsController.delete.bind(clientsController));
-router.get('/:id/campaigns', validateRequest(idParamSchema, 'params'), clientsController.getCampaigns.bind(clientsController));
+router.get('/', authenticate,authorize(['Super Admin']), clientsController.getAll);
+router.get('/:id', authenticate, validateRequest(idParamSchema, 'params'), clientsController.getById);
+router.post('/', authenticate, validateRequest(createClientSchema), clientsController.create);
+router.put('/:id', authenticate, validateRequest(idParamSchema, 'params'), validateRequest(updateClientSchema), clientsController.update);
+router.delete('/:id', authenticate, validateRequest(idParamSchema, 'params'), clientsController.delete);
+router.get('/:id/campaigns', authenticate, validateRequest(idParamSchema, 'params'), clientsController.getCampaigns);
 
 module.exports = router;
