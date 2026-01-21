@@ -7,6 +7,8 @@ const { authorize } = require("../middlewares/requireMedia");
 
 const router = express.Router();
 
+router.use(authenticate, authorize(['Super Admin']));
+
 router.get('/', authenticate,authorize(['Super Admin']), clientsController.getAll);
 router.get('/:id', authenticate, validateRequest(idParamSchema, 'params'), clientsController.getById);
 router.post('/', authenticate, validateRequest(createClientSchema), clientsController.create);
