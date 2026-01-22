@@ -9,11 +9,11 @@ const router = express.Router();
 
 router.use(authenticate, authorize(['Super Admin']));
 
-router.get('/', authenticate,authorize(['Super Admin']), clientsController.getAll);
-router.get('/:id', authenticate, validateRequest(idParamSchema, 'params'), clientsController.getById);
-router.post('/', authenticate, validateRequest(createClientSchema), clientsController.create);
-router.put('/:id', authenticate, validateRequest(idParamSchema, 'params'), validateRequest(updateClientSchema), clientsController.update);
-router.delete('/:id', authenticate, validateRequest(idParamSchema, 'params'), clientsController.delete);
-router.get('/:id/campaigns', authenticate, validateRequest(idParamSchema, 'params'), clientsController.getCampaigns);
+router.get('/' , clientsController.getAll);
+router.get('/:id', validateRequest(idParamSchema, 'params'), clientsController.getById);
+router.post('/', validateRequest(createClientSchema), clientsController.create);
+router.put('/:id', validateRequest(idParamSchema, 'params'), validateRequest(updateClientSchema), clientsController.update);
+router.delete('/:id', validateRequest(idParamSchema, 'params'), clientsController.delete);
+router.get('/:id/campaigns',validateRequest(idParamSchema, 'params'), clientsController.getCampaigns);
 
 module.exports = router;
