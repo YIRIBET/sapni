@@ -1,7 +1,7 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function loginService(email, password) {
-  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+  const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -11,7 +11,6 @@ export async function loginService(email, password) {
 
   const data = await res.json();
 
-  // Tu backend devuelve el token así
   const jwtToken = data.token?.token || data.token;
   if (!jwtToken) throw new Error("Token no recibido");
 
