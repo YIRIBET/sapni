@@ -56,6 +56,7 @@ function Campaings() {
               <th className="py-2 px-4">Cliente</th>
               <th className="py-2 px-4">Fecha de inicio</th>
               <th className="py-2 px-4">Fecha de fin</th>
+              <th className="py-2 px-4">Estatus</th>
               <th className="py-2 px-4">Acciones</th>
             </tr>
           </thead>
@@ -69,6 +70,13 @@ function Campaings() {
                 </td>
                 <td className="py-2 px-4">
                   {new Date(campaing.end_date).toLocaleDateString()}
+                </td>
+                <td className="py-2 px-4">
+                  {campaing.is_active ? (
+                    <span className="bg-green-100 text-green-800 text-sm px-1 py-1 rounded-full ">Activa</span>
+                  ) : (
+                    <span className="bg-red-100 text-red-800 text-sm px-1 py-1 rounded-full ">Inactiva</span>
+                  )}
                 </td>
                 <td className="py-2 px-4">
                   <button className=" hover:text-blue-700 mr-2">

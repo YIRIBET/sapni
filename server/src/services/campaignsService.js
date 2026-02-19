@@ -29,6 +29,7 @@ class campaignsService {
         "campaigns.end_date",
         "campaigns.client_id",
         "clients.company_name",
+        "clients.is_active",
       )
       .where("campaigns.is_active", 1)
       .orderBy("campaigns.id", "asc");
@@ -46,6 +47,7 @@ class campaignsService {
         "campaigns.end_date",
         "campaigns.client_id",
         "clients.company_name",
+        "clients.is_active"
       )
       .where("campaigns.id", id)
       .where("campaigns.is_active", 1)
