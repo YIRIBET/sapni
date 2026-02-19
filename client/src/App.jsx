@@ -10,6 +10,7 @@ import Users from "./views/Admin/Users";
 import Audithome from "./views/Auditor/Home";
 import Clients from "./views/Admin/Clients";
 import Campaings from "./views/Admin/Campaigns";
+import Orders from "./views/Admin/Orders";
 
 import AdminLayout from "./layouts/AdminLayout";
 import AuditorLayout from "./layouts/AuditorLayout";
@@ -44,7 +45,9 @@ function App() {
           <Route path="/usuarios" element={<Users />} />
           <Route path="/clientes" element={<Clients />} />
           <Route path="/campaings" element={<Campaings />} />
+          <Route path="/orders" element={<Orders />} />
         </Route>
+        
 
         {/* AUDITOR */}
         <Route
