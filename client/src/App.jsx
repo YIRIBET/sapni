@@ -11,6 +11,7 @@ import Audithome from "./views/Auditor/Home";
 import Clients from "./views/Admin/Clients";
 import Campaings from "./views/Admin/Campaigns";
 import Orders from "./views/Admin/Orders";
+import Medios from "./views/Admin/Channels";
 
 import AdminLayout from "./layouts/AdminLayout";
 import AuditorLayout from "./layouts/AuditorLayout";
@@ -46,6 +47,7 @@ function App() {
           <Route path="/clientes" element={<Clients />} />
           <Route path="/campaings" element={<Campaings />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/medios" element={<Medios />} />
         </Route>
         
 
