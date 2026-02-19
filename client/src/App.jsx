@@ -8,6 +8,7 @@ import NotFound from "./components/NotFound";
 import Dashboard from "./views/Admin/Dashboard";
 import Users from "./views/Admin/Users";
 import Audithome from "./views/Auditor/Home";
+import Clients from "./views/Admin/Clients";
 
 import AdminLayout from "./layouts/AdminLayout";
 import AuditorLayout from "./layouts/AuditorLayout";
@@ -40,6 +41,7 @@ function App() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/usuarios" element={<Users />} />
+          <Route path="/clientes" element={<Clients />} />
         </Route>
 
         {/* AUDITOR */}
