@@ -32,36 +32,6 @@ class EvidenceRecordsController {
         }
     }
 
-    async getByClientId(req, res, next) {
-        try {
-            const { clientId } = req.params;
-            const data = await evidenceRecordsService.getByClientId(clientId);
-            sendSuccess(res, data, "Registros de evidencia por cliente obtenidos exitosamente");
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async getByDiffusionOrderId(req, res, next) {
-        try {
-            const { diffusionOrderId } = req.params;
-            const data = await evidenceRecordsService.getByDiffusionOrderId(diffusionOrderId);
-            sendSuccess(res, data, "Registros de evidencia por orden de difusión obtenidos exitosamente");
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async getByStatus(req, res, next) {
-        try {
-            const { status } = req.params;
-            const data = await evidenceRecordsService.getByStatus(status);
-            sendSuccess(res, data, "Registros de evidencia por estado obtenidos exitosamente");
-        } catch (error) {
-            next(error);
-        }
-    }
-
     async getByUserId(req, res, next) {
         try {
             const { userId } = req.params;
@@ -72,26 +42,53 @@ class EvidenceRecordsController {
         }
     }
 
-    async getByMediaChannelId(req, res, next) {
+    async getCountUserEvidences(req, res, next) {
         try {
-            const { mediaChannelId } = req.params;
-            const data = await evidenceRecordsService.getByMediaChannelId(mediaChannelId);
-            sendSuccess(res, data, "Evidencias por canal de medio obtenidas exitosamente");
+            const { userId } = req.params;
+            const total = await evidenceRecordsService.getCountUserEvidences(userId);
+            sendSuccess(res, { total }, "Conteo de evidencias por usuario obtenido exitosamente");
         } catch (error) {
             next(error);
         }
     }
 
-    async getByMediaTypeId(req, res, next) {
+    async getCountByMediaChannel(req, res, next) {
         try {
-            const { mediaTypeId } = req.params;
-            const data = await evidenceRecordsService.getByMediaTypeId(mediaTypeId);
-            sendSuccess(res, data, "Evidencias por tipo de medio obtenidas exitosamente");
+            const { mediaChannelId } = req.params;
+            const data = await evidenceRecordsService.getCountByMediaChannel(mediaChannelId);
+            sendSuccess(res, data, "Conteo de evidencias por canal de medio obtenido exitosamente");
         } catch (error) {
             next(error);
         }
     }
-  
+    
+
+    async getCountsByMediaType(req, res, next) {
+        try {
+            const data = await evidenceRecordsService.getCountsByMediaType();
+            sendSuccess(res, data, "Conteo de evidencias por tipo de medio obtenido exitosamente");
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getProgressByOrder(req, res, next) {
+        try {
+            const data = await evidenceRecordsService.getProgressByOrder();
+            sendSuccess(res, data, "Progreso por orden de difusión obtenido exitosamente");
+        } catch (error) {
+            next(error);
+        }
+    }
+    async getCountsByStatus(req, res, next) {
+        try {
+            const data = await evidenceRecordsService.getCountsByStatus();
+            sendSuccess(res, data, "Conteo de evidencias por estado obtenido exitosamente");
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async create(req, res, next) {
         try {
             const evidenceRecord = await evidenceRecordsService.createEvidenceRecord(req.body);

@@ -12,28 +12,7 @@ class EvidenceRecordsService {
       .where("er.is_active", 1);
   }
 
-  async getByClientId(clientId) {
-    return await db("evidence_records as er")
-      .select("er.*", "c.client_id")
-      .join("diffusion_orders as do", "er.order_id", "do.id")
-      .join("campaigns as c", "do.campaign_id", "c.id")
-      .where("c.client_id", clientId)
-      .where("er.is_active", 1);
-  }
 
-  async getByDiffusionOrderId(orderId) {
-    return await db("evidence_records")
-      .where("order_id", orderId)
-      .where("is_active", 1);
-  }
-
-  async getByStatus(status) {
-    return await db("evidence_records as er")
-      .select("er.*", "rs.name as status_name")
-      .join("review_status as rs", "er.status_id", "rs.id")
-      .where(isNaN(status) ? "rs.name" : "er.status_id", status)
-      .where("er.is_active", 1);
-  }
 
   async getByUserId(userId) {
     return await db("evidence_records as er")
@@ -48,44 +27,77 @@ class EvidenceRecordsService {
       .where("er.is_active", 1);
   }
 
-  async getByMediaTypeId(mediaTypeId) {
-    return await db("evidence_records as er")
+  async getCountUserEvidences() {
+    const result = await db("evidence_records as er")
+      .join("users as u", "er.user_id", "u.id")
+      .groupBy("u.id", "u.nombre")
       .select(
-        "er.*",
-        "cf.format_name",
-        "rs.status_name",
-        "mc.channel_name",
-        "mc.id as media_channel_id",
-        "mt.type_name as media_type",
-        "mt.id as media_type_id",
-      )
-      .join("diffusion_orders as do", "er.order_id", "do.id")
-      .join("media_channels as mc", "do.media_channel_id", "mc.id")
-      .join("media_types as mt", "mc.media_type_id", "mt.id")
-      .leftJoin("content_formats as cf", "er.format_id", "cf.id")
-      .leftJoin("review_status as rs", "er.status_id", "rs.id")
-      .where("mt.id", mediaTypeId)
-      .where("er.is_active", 1);
+        "u.id as user_id",
+        "u.nombre as user_name",
+        db.raw("COUNT(er.id) as total_evidences")
+      );
+    return result;
+
   }
 
-  async getByMediaChannelId(mediaChannelId) {
-    return await db("evidence_records as er")
-      .select(
-        "er.*",
-        "cf.format_name",
-        "rs.status_name",
-        "mc.channel_name",
-        "mc.id as media_channel_id",
-        "mt.type_name as media_type",
-      )
+  async getCountByMediaChannel() {
+    return db("evidence_records as er")
       .join("diffusion_orders as do", "er.order_id", "do.id")
-      .leftJoin("content_formats as cf", "er.format_id", "cf.id")
-      .leftJoin("review_status as rs", "er.status_id", "rs.id")
-      .leftJoin("media_channels as mc", "do.media_channel_id", "mc.id")
-      .leftJoin("media_types as mt", "mc.media_type_id", "mt.id")
-      .where("do.media_channel_id", mediaChannelId)
-      .where("er.is_active", 1);
+      .join("media_channels as mc", "do.media_channel_id", "mc.id")
+      .groupBy("mc.id", "mc.channel_name")
+      .select(
+        "mc.id as media_channel_id",
+        "mc.channel_name",
+        db.raw("COUNT(er.id) as total_evidences")
+      );
   }
+
+  async getCountsByMediaType() {
+  return db("evidence_records as er")
+    .join("diffusion_orders as do", "er.order_id", "do.id")
+    .join("media_channels as mc", "do.media_channel_id", "mc.id")
+    .join("media_types as mt", "mc.media_type_id", "mt.id")
+    .groupBy("mt.id", "mt.type_name")
+    .select(
+      "mt.id as media_type_id",
+      "mt.type_name",
+      db.raw("COUNT(er.id) as total_evidences")
+    );
+}
+
+async getProgressByOrder() {
+  return db("diffusion_orders as do")
+    .leftJoin("evidence_records as er", "er.order_id", "do.id")
+    .groupBy(
+      "do.id",
+      "do.campaign_id",
+      "do.total_spots_ordered"
+    )
+    .select(
+      "do.id as order_id",
+      "do.campaign_id",
+      "do.total_spots_ordered",
+      db.raw("COUNT(er.id) as evidences_done"),
+      db.raw(`
+        ROUND(
+          (COUNT(er.id) / do.total_spots_ordered) * 100,
+          2
+        ) as progress_percentage
+      `)
+    );
+}
+
+async getCountsByStatus() {
+  return db("evidence_records as er")
+    .join("review_status as rs", "er.status_id", "rs.id")
+    .groupBy("rs.id", "rs.status_name")
+    .select(
+      "rs.id as status_id",
+      "rs.status_name",
+      db.raw("COUNT(er.id) as total")
+    );
+}
+
 
   async getAllEvidenceRecords() {
     const evidenceRecords = await db("evidence_records")
