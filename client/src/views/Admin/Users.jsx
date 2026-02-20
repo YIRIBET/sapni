@@ -1,7 +1,8 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { fetchUsers } from "../../services/userService";
+import { fetchUsers, deleteUser } from "../../services/userService";
 import UsersModal from "../../components/modals/usersModal";
+import Swal from "sweetalert2";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -41,11 +42,46 @@ function Users() {
     setIsModalOpen(false);
   };
 
+  const handleDelete = async (userId) => {
+    const result = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: "No podrás revertir esta acción",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await deleteUser(userId);
+
+      await Swal.fire({
+        title: "Eliminado",
+        text: "El usuario fue eliminado correctamente",
+        icon: "success",
+      });
+
+      loadUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo eliminar el usuario",
+        icon: "error",
+      });
+    }
+  };
+
   const filteredUsers = users.filter((user) =>
-  `${user.nombre} ${user.apellidos} ${user.email}`
-    .toLowerCase()
-    .includes(search.toLowerCase())
-);
+    `${user.nombre} ${user.apellidos} ${user.email}`
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  );
 
   return (
     <div>
@@ -94,7 +130,7 @@ function Users() {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map(user => (
+            {filteredUsers.map((user) => (
               <tr key={user.id} className="border-t border-gray-200">
                 <td className="py-2 px-4">{user.nombre}</td>
                 <td className="py-2 px-4">{user.email}</td>
@@ -121,7 +157,10 @@ function Users() {
                     </svg>
                   </button>
 
-                  <button className="text-red-500 hover:text-red-700">
+                  <button
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => handleDelete(user.id)}
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="20"
