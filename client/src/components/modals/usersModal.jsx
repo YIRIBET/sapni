@@ -64,9 +64,6 @@ const UsersModal = ({ user, onClose, onSuccess }) => {
         <h2 className="text-xl font-bold mb-6 text-center">
           {isEdit ? "Editar usuario" : "Crear usuario"}
         </h2>
-        
-       
-
         <Formik
           initialValues={initialValues}
           validationSchema={getValidationSchema(isEdit)}

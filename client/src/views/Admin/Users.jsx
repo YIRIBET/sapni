@@ -7,6 +7,7 @@ function Users() {
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function loadUsers() {
@@ -30,7 +31,6 @@ function Users() {
     setIsModalOpen(true);
   };
 
-
   const openModal = (user) => {
     setSelectedUser(user);
     setIsModalOpen(true);
@@ -41,11 +41,20 @@ function Users() {
     setIsModalOpen(false);
   };
 
+  const filteredUsers = users.filter((user) =>
+  `${user.nombre} ${user.apellidos} ${user.email}`
+    .toLowerCase()
+    .includes(search.toLowerCase())
+);
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Usuarios</h1>
       <div className="flex justify-end items-center mb-4 mr-4">
-        <button className="bg-[#1A6795] text-white px-4 py-2 rounded-md ml-2" onClick={openCreateModal}>
+        <button
+          className="bg-[#1A6795] text-white px-4 py-2 rounded-md ml-2"
+          onClick={openCreateModal}
+        >
           Agregar
         </button>
       </div>
@@ -69,6 +78,8 @@ function Users() {
             <input
               type="text"
               placeholder="Buscar usuarios..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="bg-gray-100 rounded-md pl-10 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -83,7 +94,7 @@ function Users() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {filteredUsers.map(user => (
               <tr key={user.id} className="border-t border-gray-200">
                 <td className="py-2 px-4">{user.nombre}</td>
                 <td className="py-2 px-4">{user.email}</td>
@@ -136,12 +147,12 @@ function Users() {
           </tbody>
         </table>
         {isModalOpen && (
-        <UsersModal
-          user={selectedUser}
-          onClose={closeModal}
-          onSuccess={loadUsers}
-        />
-      )}
+          <UsersModal
+            user={selectedUser}
+            onClose={closeModal}
+            onSuccess={loadUsers}
+          />
+        )}
       </div>
     </div>
   );
