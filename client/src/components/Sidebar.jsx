@@ -50,7 +50,12 @@ function Sidebar() {
           <p className="ml-4">Medios</p>
         </a>
       </li>
-
+       <li>
+        <a href="/evidencias" class="flex items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-blue-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-form-icon lucide-form"><path d="M4 14h6"/><path d="M4 2h10"/><rect x="4" y="18" width="16" height="4" rx="1"/><rect x="4" y="6" width="16" height="4" rx="1"/></svg>
+          <p className="ml-4">Evidencias</p>
+        </a>
+      </li>
       <li>
         <details class="group [&amp;_summary::-webkit-details-marker]:hidden">
           <summary class="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">

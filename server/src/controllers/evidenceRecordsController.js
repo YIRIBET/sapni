@@ -88,15 +88,27 @@ class EvidenceRecordsController {
             next(error);
         }
     }
+async create(req, res, next) {
+  try {
+    const result = await evidenceRecordsService.createEvidenceRecord(req.body);
 
-    async create(req, res, next) {
-        try {
-            const evidenceRecord = await evidenceRecordsService.createEvidenceRecord(req.body);
-            sendSuccess(res, evidenceRecord, "Registro de evidencia creado exitosamente", 201);
-        } catch (error) {
-            next(error);
-        }
+    sendSuccess(
+      res,
+      result,
+      "Registro de evidencia creado exitosamente",
+      201
+    );
+  } catch (error) {
+
+    // 🛑 Errores esperados para el usuario
+    if (error.name === "ValidationError") {
+      return sendError(res, error.message, 400);
     }
+
+    // 🔥 Errores inesperados
+    next(error);
+  }
+}
 
     async update(req, res, next) {
         try {

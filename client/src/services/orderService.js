@@ -10,3 +10,21 @@ export async function getOrders() {
     if (!res.ok) throw new Error("Failed to fetch orders");
     return await res.json();
  }
+
+export async function getOrderById(orderId) {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${API_URL}/diffusion-orders/${orderId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to get order");
+  }
+
+  return await res.json();
+}

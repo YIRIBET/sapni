@@ -92,7 +92,7 @@ function Dashboard() {
     if (percentage < 25) return "bg-red-500";
     if (percentage < 70) return "bg-yellow-400";
     if (percentage < 90) return "bg-green-400";
-    return "bg-green-600"; // 90–100
+    return "bg-green-600";
   };
 
   return (
@@ -139,20 +139,17 @@ function Dashboard() {
           );
         })}
       </div>
-
       <div className="grid col-grid grid-cols-2 md:grid-cols-3 gap-4 justify-center items-center mt-4 ">
-        <div className="bg-white rounded-lg p-4 shadow">
-          <h2 className="text-sm font-medium text-gray-600 mb-5">
-            Notas por estado
-          </h2>
-
-          <Pie data={statusChartData} options={options} />
-        </div>
+        <div className="bg-white rounded-lg shadow p-4 min-h-full">
+        <h2 className="text-sm font-medium text-gray-600 mb-5">
+          Notas por estado
+        </h2>
+        <Pie data={statusChartData} options={options} />
+      </div>
         <div className="bg-white rounded-lg shadow p-4 h-full">
           <h2 className="text-sm font-semibold text-gray-700 mb-4">
             Medios con más evidencias
           </h2>
-
           <ul className="space-y-3">
             {mediaChannelCounts.map((item) => (
               <li
