@@ -3,35 +3,37 @@ const { NotFoundError, ValidationError } = require("../utils/errors");
 const diffusionOrdersValidator = require("../validators/diffusionOrdersValidator");
 
 class diffusionOrdersService {
-  async getAllDiffusionOrders() {
-    const diffusionOrders = await db("diffusion_orders")
-      .join("campaigns", "diffusion_orders.campaign_id", "=", "campaigns.id")
-      .join(
-        "media_channels",
-        "diffusion_orders.media_channel_id",
-        "=",
-        "media_channels.id",
-      )
-      .join(
+async getAllDiffusionOrders() {
+  const diffusionOrders = await db("diffusion_orders")
+    .join("campaigns", "diffusion_orders.campaign_id", "=", "campaigns.id")
+    .join(
+      "media_channels",
+      "diffusion_orders.media_channel_id",
+      "=",
+      "media_channels.id"
+    )
+    .join(
       "media_types",
       "media_channels.media_type_id",
+      "=",
       "media_types.id"
     )
-      .select(
-        "diffusion_orders.id",
-        "diffusion_orders.campaign_id",
-        "campaigns.campaign_name",
-        "diffusion_orders.total_spots_ordered",
-        "diffusion_orders.contract_amount",
-        "diffusion_orders.media_channel_id",
-        "media_types.id ",
-        "media_types.type_name as media_type_name",
-        "media_channels.channel_name",
-      )
-      .where("diffusion_orders.is_active", 1)
-      .orderBy("diffusion_orders.id", "des");
-    return diffusionOrders;
-  }
+    .select(
+      "diffusion_orders.id",
+      "diffusion_orders.campaign_id",
+      "campaigns.campaign_name",
+      "diffusion_orders.total_spots_ordered",
+      "diffusion_orders.contract_amount",
+      "diffusion_orders.media_channel_id",
+      "media_types.id as media_type_id",
+      "media_types.type_name as media_type_name",
+      "media_channels.channel_name"
+    )
+    .where("diffusion_orders.is_active", 1)
+    .orderBy("diffusion_orders.id", "desc");
+
+  return diffusionOrders;
+}
 
 async getDiffusionOrderById(id) {
   const diffusionOrder = await db("diffusion_orders")
@@ -73,6 +75,27 @@ async getDiffusionOrderById(id) {
   }
 
   return diffusionOrder;
+}
+
+async getAllDiffusionOrdersByMediaType(media_type_id) {
+
+  const orders = await db("diffusion_orders")
+    .join("campaigns", "diffusion_orders.campaign_id", "campaigns.id")
+    .join("media_channels", "diffusion_orders.media_channel_id", "media_channels.id")
+    .join("media_types", "media_channels.media_type_id", "media_types.id")
+    .select(
+      "diffusion_orders.id",
+      "diffusion_orders.campaign_id",
+      "campaigns.campaign_name",
+      "diffusion_orders.media_channel_id",
+      "media_types.type_name as media_type_name",
+      "media_channels.channel_name"
+    )
+    .where("media_channels.media_type_id", media_type_id)
+    .where("diffusion_orders.is_active", 1)
+    .orderBy("diffusion_orders.id", "desc");
+
+  return orders;
 }
 
   async createDiffusionOrder(data) {

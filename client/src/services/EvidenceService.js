@@ -54,7 +54,7 @@ export async function deleteEvidence(evidenceId) {
     return await res.json();
 }
 
-//filtros
+
 export async function fetchCountUserEvidence() {
   const token = localStorage.getItem("token");
   const res = await fetch(`${API_URL}/evidence-records/count/user`, {

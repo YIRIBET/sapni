@@ -17,14 +17,19 @@ export async function loginService(email, password) {
   // Decodificar JWT
   const payload = JSON.parse(atob(jwtToken.split(".")[1]));
 
-  const role = payload.role?.toUpperCase().replace(" ", "_"); 
-  const userId = payload.id;
-  console.log("Decoded JWT Payload:", payload);
+ const role = payload.role?.toUpperCase().replace(" ", "_");
+const userId = payload.id;
+const mediaTypeId = payload.media_type_id;
+const userName = payload.nombre; // o payload.name según tu backend
 
-  // Guardar en localStorage
-  localStorage.setItem("token", jwtToken);
-  localStorage.setItem("userRole", role);
-  localStorage.setItem("userId", userId);
+console.log("Decoded JWT Payload:", payload);
+
+// Guardar en localStorage
+localStorage.setItem("token", jwtToken);
+localStorage.setItem("userRole", role);
+localStorage.setItem("userId", userId);
+localStorage.setItem("mediaTypeId", mediaTypeId);
+localStorage.setItem("userName", userName);
 
   return { token: jwtToken, role, userId };
 }

@@ -2,7 +2,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export async function getOrders() {
     const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/diffusion-orders/`, {
+    const res = await fetch(`${API_URL}/diffusion-orders`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -28,3 +28,23 @@ export async function getOrderById(orderId) {
 
   return await res.json();
 }
+
+export async function getOrdersByMediaType(mediaTypeId) {
+
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${API_URL}/diffusion-orders/media-type/${mediaTypeId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error("Error fetching orders");
+  }
+
+  return await res.json();
+}
+
