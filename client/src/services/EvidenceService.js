@@ -15,45 +15,44 @@ export async function fetchEvidence() {
 }
 
 export async function createEvidence(evidenceData) {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/evidence-records`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(evidenceData)
-    });
-    if (!res.ok) throw new Error("Failed to create evidence record");
-    return await res.json();
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/evidence-records`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(evidenceData),
+  });
+  if (!res.ok) throw new Error("Failed to create evidence record");
+  return await res.json();
 }
 
 export async function updateEvidence(evidenceId, evidenceData) {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/evidence-records/${evidenceId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(evidenceData)
-    });
-    if (!res.ok) throw new Error("Failed to update evidence record");
-    return await res.json();
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/evidence-records/${evidenceId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(evidenceData),
+  });
+  if (!res.ok) throw new Error("Failed to update evidence record");
+  return await res.json();
 }
 
 export async function deleteEvidence(evidenceId) {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/evidence-records/${evidenceId}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-    if (!res.ok) throw new Error("Failed to delete evidence record");
-    return await res.json();
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/evidence-records/${evidenceId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to delete evidence record");
+  return await res.json();
 }
-
 
 export async function fetchCountUserEvidence() {
   const token = localStorage.getItem("token");
@@ -64,7 +63,7 @@ export async function fetchCountUserEvidence() {
   if (!res.ok) throw new Error("Failed to fetch user evidence count");
 
   const json = await res.json();
-    return json.data?.total || [];
+  return json.data?.total || [];
 }
 
 export async function fetchCountByMediaChannel() {
@@ -100,7 +99,7 @@ export async function fetchCountsByStatus() {
   if (!res.ok) throw new Error("Failed to fetch status counts");
 
   const json = await res.json();
-  return json.data.rows || [];
+  return json.data || [];
 }
 
 export async function fetchProgressByOrder() {

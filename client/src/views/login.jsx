@@ -24,7 +24,7 @@ function Login() {
         text: "Has iniciado sesión correctamente",
         icon: "success",
         confirmButtonText: "Continuar",
-        confirmButtonColor: "#E30713",
+        confirmButtonColor: "#1A6795",
       }).then(() => {
   if (role === "SUPER_ADMIN") {
     navigate("/dashboard");
@@ -38,7 +38,7 @@ function Login() {
         text: "Correo o contraseña incorrectos",
         icon: "error",
         confirmButtonText: "Entendido",
-        confirmButtonColor: "#E30713",
+        confirmButtonColor: "#1A6795",
       });
       console.error(err);
     } finally {

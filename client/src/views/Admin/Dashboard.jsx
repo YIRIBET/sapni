@@ -119,14 +119,23 @@ function Dashboard() {
           </button>
         </div>
         {orderProgress.map((order) => {
-          const progress = Number(order.progress_percentage) || 0;
+          const realProgress = Number(order.progress_percentage) || 0;
+
+          // límite visual para la barra
+          const progress = Math.min(realProgress, 100);
+
           const colorClass = getProgressColor(progress);
 
           return (
             <div key={order.order_id} className="mb-4">
               <div className="flex justify-between text-sm mb-1">
                 <span>Orden #{order.order_id}</span>
-                <span className="font-medium">{progress}%</span>
+
+                <span className="font-medium">
+                  {realProgress > 100
+                    ? `100% (+${Math.round(realProgress - 100)}%)`
+                    : `${realProgress}%`}
+                </span>
               </div>
 
               <div className="w-full bg-gray-200 h-3 rounded">
@@ -135,17 +144,23 @@ function Dashboard() {
                   style={{ width: `${progress}%` }}
                 />
               </div>
+
+              {realProgress > 100 && (
+                <p className="text-xs text-red-500 mt-1">
+                  Evidencias adicionales detectadas
+                </p>
+              )}
             </div>
           );
         })}
       </div>
       <div className="grid col-grid grid-cols-2 md:grid-cols-3 gap-4 justify-center items-center mt-4 ">
         <div className="bg-white rounded-lg shadow p-4 min-h-full">
-        <h2 className="text-sm font-medium text-gray-600 mb-5">
-          Notas por estado
-        </h2>
-        <Pie data={statusChartData} options={options} />
-      </div>
+          <h2 className="text-sm font-medium text-gray-600 mb-5">
+            Notas por estado
+          </h2>
+          <Pie data={statusChartData} options={options} />
+        </div>
         <div className="bg-white rounded-lg shadow p-4 h-full">
           <h2 className="text-sm font-semibold text-gray-700 mb-4">
             Medios con más evidencias

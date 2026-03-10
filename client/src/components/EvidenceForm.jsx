@@ -1,36 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import Swal from "sweetalert2";
 import { createEvidence } from "../services/EvidenceService";
 import { getOrdersByMediaType } from "../services/OrderService";
 
 export default function EvidenceForm() {
   const [mediaType, setMediaType] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    order_id: "",
-    user_id: "",
-    status_id: "",
-    format_id: "",
-    program_name: "",
-    publication_title: "",
-    evidence_date: "",
-    evidence_time: "",
-    link: "",
-    internal_notes: "",
-  });
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
     const mediaTypeId = localStorage.getItem("mediaTypeId");
-
-    if (userId) {
-      setFormData((prev) => ({
-        ...prev,
-        user_id: userId,
-      }));
-    }
-
     if (mediaTypeId) {
       setMediaType(Number(mediaTypeId));
     }
@@ -42,51 +22,76 @@ export default function EvidenceForm() {
     const fetchOrders = async () => {
       try {
         const data = await getOrdersByMediaType(mediaType);
-
-        console.log("Ordenes recibidas:", data);
-
         setOrders(data);
       } catch (error) {
-        console.error("Error cargando órdenes:", error);
+        console.error(error);
       }
     };
 
     fetchOrders();
   }, [mediaType]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const validationSchema = Yup.object({
+    order_id: Yup.string().required("Debes seleccionar una orden"),
+    status_id: Yup.string().required("Debes seleccionar un estado"),
+    format_id: Yup.string().required("Debes seleccionar un formato"),
+    evidence_date: Yup.string().required("La fecha es obligatoria"),
+    evidence_time: Yup.string().required("La hora es obligatoria"),
+
+    program_name:
+      mediaType === 1
+        ? Yup.string().required("El nombre del programa es obligatorio")
+        : Yup.string(),
+
+    publication_title:
+      [2, 3, 4].includes(mediaType)
+        ? Yup.string().required("El título es obligatorio")
+        : Yup.string(),
+
+    link:
+      [2, 3].includes(mediaType)
+        ? Yup.string()
+            .url("Debe ser un enlace válido")
+            .required("El enlace es obligatorio")
+        : Yup.string(),
+  });
+
+  const initialValues = {
+    order_id: "",
+    user_id: localStorage.getItem("userId"),
+    status_id: "",
+    format_id: "",
+    program_name: "",
+    publication_title: "",
+    evidence_date: "",
+    evidence_time: "",
+    link: "",
+    internal_notes: "",
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const inputClass = (error, touched) =>
+    `w-full border rounded-lg p-2.5 ${
+      touched
+        ? error
+          ? "border-red-500"
+          : "border-green-500"
+        : "border-gray-300"
+    }`;
 
+  const handleSubmit = async (values, { resetForm }) => {
     try {
-      await createEvidence(formData);
+      await createEvidence(values);
 
-      alert("Evidencia registrada correctamente");
+      Swal.fire({
+        icon: "success",
+        title: "Evidencia registrada",
+        text: "La evidencia fue guardada correctamente",
+        confirmButtonColor: "#1A6795",
+      });
 
-      setFormData((prev) => ({
-        ...prev,
-        order_id: "",
-        status_id: "",
-        format_id: "",
-        program_name: "",
-        publication_title: "",
-        evidence_date: "",
-        evidence_time: "",
-        link: "",
-        internal_notes: "",
-      }));
+      resetForm();
     } catch (error) {
       console.error(error);
-      alert("Error al registrar evidencia");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -96,163 +101,230 @@ export default function EvidenceForm() {
         Registrar Evidencia
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Orden de difusión
-          </label>
-          <select
-            name="order_id"
-            value={formData.order_id}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-2.5"
-            required
-          >
-            <option value="">Selecciona una orden</option>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ errors, touched }) => (
+          <Form className="space-y-6">
 
-            {orders.map((order) => (
-              <option key={order.id} value={order.id}>
-                {order.campaign_name} - {order.channel_name}
-              </option>
-            ))}
-          </select>
-        </div>
-        {mediaType === 1 && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nombre del programa
-            </label>
-            <input
-              type="text"
-              name="program_name"
-              value={formData.program_name}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5"
-              required
-            />
-          </div>
+            {/* ORDEN */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Orden de difusión
+              </label>
+
+              <Field
+                as="select"
+                name="order_id"
+                className={inputClass(errors.order_id, touched.order_id)}
+              >
+                <option value="">Selecciona una orden</option>
+
+                {orders.map((order) => (
+                  <option key={order.id} value={order.id}>
+                    {order.campaign_name} - {order.channel_name}
+                  </option>
+                ))}
+              </Field>
+
+              <ErrorMessage
+                name="order_id"
+                component="p"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
+
+            {/* RADIO */}
+            {mediaType === 1 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nombre del programa
+                </label>
+
+                <Field
+                  name="program_name"
+                  className={inputClass(
+                    errors.program_name,
+                    touched.program_name
+                  )}
+                />
+
+                <ErrorMessage
+                  name="program_name"
+                  component="p"
+                  className="text-red-500 text-sm"
+                />
+              </div>
+            )}
+
+            {/* PUBLICACION */}
+            {[2, 3, 4].includes(mediaType) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Título de la publicación
+                </label>
+
+                <Field
+                  name="publication_title"
+                  className={inputClass(
+                    errors.publication_title,
+                    touched.publication_title
+                  )}
+                />
+
+                <ErrorMessage
+                  name="publication_title"
+                  component="p"
+                  className="text-red-500 text-sm"
+                />
+              </div>
+            )}
+
+            {/* LINK */}
+            {[2, 3].includes(mediaType) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enlace
+                </label>
+
+                <Field
+                  name="link"
+                  className={inputClass(errors.link, touched.link)}
+                />
+
+                <ErrorMessage
+                  name="link"
+                  component="p"
+                  className="text-red-500 text-sm"
+                />
+              </div>
+            )}
+
+            {/* ESTADO */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Estado
+              </label>
+
+              <Field
+                as="select"
+                name="status_id"
+                className={inputClass(errors.status_id, touched.status_id)}
+              >
+                <option value="">Selecciona</option>
+                <option value="1">Positivo</option>
+                <option value="2">Negativo</option>
+                <option value="3">Neutral</option>
+                <option value="4">Reporte</option>
+              </Field>
+
+              <ErrorMessage
+                name="status_id"
+                component="p"
+                className="text-red-500 text-sm"
+              />
+            </div>
+
+            {/* FORMATO */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Formato
+              </label>
+
+              <Field
+                as="select"
+                name="format_id"
+                className={inputClass(errors.format_id, touched.format_id)}
+              >
+                <option value="">Selecciona</option>
+                <option value="1">Nota</option>
+                <option value="2">Foto</option>
+                <option value="3">Spot</option>
+                <option value="4">Texto</option>
+              </Field>
+
+              <ErrorMessage
+                name="format_id"
+                component="p"
+                className="text-red-500 text-sm"
+              />
+            </div>
+
+            {/* FECHA Y HORA */}
+            <div className="grid md:grid-cols-2 gap-4">
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Fecha
+                </label>
+
+                <Field
+                  type="date"
+                  name="evidence_date"
+                  className={inputClass(
+                    errors.evidence_date,
+                    touched.evidence_date
+                  )}
+                />
+
+                <ErrorMessage
+                  name="evidence_date"
+                  component="p"
+                  className="text-red-500 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Hora
+                </label>
+
+                <Field
+                  type="time"
+                  name="evidence_time"
+                  className={inputClass(
+                    errors.evidence_time,
+                    touched.evidence_time
+                  )}
+                />
+
+                <ErrorMessage
+                  name="evidence_time"
+                  component="p"
+                  className="text-red-500 text-sm"
+                />
+              </div>
+
+            </div>
+
+            {/* NOTAS */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Notas internas
+              </label>
+
+              <Field
+                as="textarea"
+                name="internal_notes"
+                rows="4"
+                className="w-full border border-gray-300 rounded-lg p-2.5"
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-[#1A6795] text-white rounded-lg hover:bg-[#155a80]"
+              >
+                Guardar
+              </button>
+            </div>
+
+          </Form>
         )}
-        {[2, 3, 4].includes(mediaType) && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Título de la publicación
-            </label>
-            <input
-              type="text"
-              name="publication_title"
-              value={formData.publication_title}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5"
-              required
-            />
-          </div>
-        )}
-        {[2, 3].includes(mediaType) && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Enlace
-            </label>
-            <input
-              type="url"
-              name="link"
-              value={formData.link}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5"
-              required
-            />
-          </div>
-        )}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Estado
-          </label>
-
-          <select
-            name="status_id"
-            value={formData.status_id}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-2.5"
-            required
-          >
-            <option value="">Selecciona</option>
-            <option value="1">Positivo</option>
-            <option value="2">Negativo</option>
-            <option value="3">Neutral</option>
-            <option value="4">Reporte</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Formato
-          </label>
-
-          <select
-            name="format_id"
-            value={formData.format_id}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-2.5"
-            required
-          >
-            <option value="">Selecciona</option>
-            <option value="1">Nota</option>
-            <option value="2">Foto</option>
-            <option value="3">Spot</option>
-            <option value="4">Texto</option>
-          </select>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">
-              Fecha
-            </label>
-            <input
-              type="date"
-              name="evidence_date"
-              value={formData.evidence_date}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">
-              Hora
-            </label>
-            <input
-              type="time"
-              name="evidence_time"
-              value={formData.evidence_time}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5"
-              required
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Notas Internas
-          </label>
-
-          <textarea
-            name="internal_notes"
-            rows="4"
-            value={formData.internal_notes}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-2.5"
-          />
-        </div>
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2.5 bg-[#1A6795] text-white rounded-lg hover:bg-[#1A6798] disabled:opacity-60"
-          >
-            {loading ? "Guardando..." : "Guardar"}
-          </button>
-        </div>
-      </form>
+      </Formik>
     </div>
   );
 }

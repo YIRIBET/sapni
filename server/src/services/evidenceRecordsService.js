@@ -3,7 +3,6 @@ const { NotFoundError, ValidationError } = require("../utils/errors");
 const evidenceRecordsValidator = require("../validators/evidenceRecordsValidator");
 
 class EvidenceRecordsService {
-  
   async getByCampaignId(campaignId) {
     return await db("evidence_records as er")
       .select("er.*", "do.campaign_id")
@@ -81,8 +80,8 @@ class EvidenceRecordsService {
   }
 
   async getCountsByStatus() {
-    return db("evidence_records as er")
-      .join("review_status as rs", "er.status_id", "rs.id")
+    return db("review_status as rs")
+      .leftJoin("evidence_records as er", "er.status_id", "rs.id")
       .groupBy("rs.id", "rs.status_name")
       .select(
         "rs.id as status_id",
@@ -160,35 +159,27 @@ class EvidenceRecordsService {
     return evidenceRecord;
   }
 
-async getAnomalyTypeId(trx, code, description = null) {
-  let anomalyType = await trx("anomaly_types")
-    .where("code", code)
-    .first();
+  async getAnomalyTypeId(trx, code, description = null) {
+    let anomalyType = await trx("anomaly_types").where("code", code).first();
 
-  if (!anomalyType) {
-    const [id] = await trx("anomaly_types").insert({
-      code,
-      description: description || code
-    });
+    if (!anomalyType) {
+      const [id] = await trx("anomaly_types").insert({
+        code,
+        description: description || code,
+      });
 
-    return id;
+      return id;
+    }
+
+    return anomalyType.id;
   }
-
-  return anomalyType.id;
-}
-
 
   async createEvidenceRecord(data) {
     const validatedData = evidenceRecordsValidator.validateCreate(data);
 
-
     const order = await db("diffusion_orders as do")
       .join("media_channels as mc", "do.media_channel_id", "mc.id")
-      .select(
-        "do.id",
-        "do.total_spots_ordered",
-        "mc.media_type_id"
-      )
+      .select("do.id", "do.total_spots_ordered", "mc.media_type_id")
       .where("do.id", validatedData.order_id)
       .first();
 
@@ -207,7 +198,7 @@ async getAnomalyTypeId(trx, code, description = null) {
 
     if (user.media_type_id !== order.media_type_id) {
       throw new ValidationError(
-        "El usuario no pertenece al tipo de medio de esta orden"
+        "El usuario no pertenece al tipo de medio de esta orden",
       );
     }
 
@@ -229,10 +220,7 @@ async getAnomalyTypeId(trx, code, description = null) {
       if (nextCount > order.total_spots_ordered) {
         hasAnomaly = true;
 
-        const anomalyTypeId = await this.getAnomalyTypeId(
-          trx,
-          "EXTRA_SPOT"
-        );
+        const anomalyTypeId = await this.getAnomalyTypeId(trx, "EXTRA_SPOT");
 
         await trx("evidence_anomalies").insert({
           evidence_id: evidenceId,
@@ -240,7 +228,6 @@ async getAnomalyTypeId(trx, code, description = null) {
           description: `Spot ${nextCount}/${order.total_spots_ordered}`,
         });
       }
-
 
       const duplicate = await trx("evidence_records")
         .where({
@@ -257,7 +244,7 @@ async getAnomalyTypeId(trx, code, description = null) {
 
         const anomalyTypeId = await this.getAnomalyTypeId(
           trx,
-          "DUPLICATE_EVIDENCE"
+          "DUPLICATE_EVIDENCE",
         );
 
         await trx("evidence_anomalies").insert({
@@ -269,7 +256,7 @@ async getAnomalyTypeId(trx, code, description = null) {
 
       const now = new Date();
       const evidenceDateTime = new Date(
-        `${validatedData.evidence_date}T${validatedData.evidence_time}:00`
+        `${validatedData.evidence_date}T${validatedData.evidence_time}:00`,
       );
 
       const diffMinutes = Math.abs((now - evidenceDateTime) / 60000);
@@ -278,10 +265,7 @@ async getAnomalyTypeId(trx, code, description = null) {
       if (diffMinutes > TOLERANCE_MINUTES) {
         hasAnomaly = true;
 
-        const anomalyTypeId = await this.getAnomalyTypeId(
-          trx,
-          "TIME_EXCEEDED"
-        );
+        const anomalyTypeId = await this.getAnomalyTypeId(trx, "TIME_EXCEEDED");
 
         await trx("evidence_anomalies").insert({
           evidence_id: evidenceId,
@@ -299,7 +283,6 @@ async getAnomalyTypeId(trx, code, description = null) {
 
     return { success: true };
   }
-
 
   async updateEvidenceRecord(id, data) {
     await this.getEvidenceRecordById(id);
