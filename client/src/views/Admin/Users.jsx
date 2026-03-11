@@ -1,14 +1,17 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { fetchUsers, deleteUser } from "../../services/userService";
 import UsersModal from "../../components/modals/usersModal";
 import Swal from "sweetalert2";
+import ExportPDFButton from "../../components/ExportPDFButton";
+import FilterDropdown from "../../components/FilterDropdown";
 
 function Users() {
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState("");
+  const [filtroMedio, setFiltroMedio] = useState("Todos");
 
   useEffect(() => {
     async function loadUsers() {
@@ -58,17 +61,14 @@ function Users() {
 
     try {
       await deleteUser(userId);
-
       await Swal.fire({
         title: "Eliminado",
         text: "El usuario fue eliminado correctamente",
         icon: "success",
       });
-
       loadUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
-
       Swal.fire({
         title: "Error",
         text: "No se pudo eliminar el usuario",
@@ -77,16 +77,36 @@ function Users() {
     }
   };
 
-  const filteredUsers = users.filter((user) =>
-    `${user.nombre} ${user.apellidos} ${user.email}`
+  const mediosDisponibles = [
+    "Todos",
+    ...new Set(users.map((u) => u.type_name).filter(Boolean)),
+  ];
+
+  const filteredUsers = users.filter((user) => {
+    const matchSearch = `${user.nombre} ${user.apellidos} ${user.email}`
       .toLowerCase()
-      .includes(search.toLowerCase()),
-  );
+      .includes(search.toLowerCase());
+    const matchMedio =
+      filtroMedio === "Todos" || user.type_name === filtroMedio;
+    return matchSearch && matchMedio;
+  });
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Usuarios</h1>
       <div className="flex justify-end items-center mb-4 mr-4">
+        <ExportPDFButton
+          title="Reporte de Usuarios"
+          filename="usuarios.pdf"
+          columns={[
+            { label: "Nombre", key: "nombre" },
+            { label: "Correo", key: "email" },
+            { label: "Medio", key: "type_name" },
+          ]}
+          rows={filteredUsers}
+          filters={{ Medio: filtroMedio, Búsqueda: search }}
+        />
+
         <button
           className="bg-[#1A6795] text-white px-4 py-2 rounded-md ml-2"
           onClick={openCreateModal}
@@ -119,6 +139,14 @@ function Users() {
               className="bg-gray-100 rounded-md pl-10 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          <div className="flex gap-2 flex-wrap">
+            <FilterDropdown
+              label="Medio"
+              options={mediosDisponibles}
+              value={filtroMedio}
+              onChange={setFiltroMedio}
+            />
+          </div>
         </div>
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>
@@ -137,7 +165,7 @@ function Users() {
                 <td className="py-2 px-4">{user.type_name}</td>
                 <td className="py-2 px-4">
                   <button
-                    className=" hover:text-blue-700 mr-2"
+                    className="hover:text-blue-700 mr-2"
                     onClick={() => openModal(user)}
                   >
                     <svg
@@ -147,16 +175,14 @@ function Users() {
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="lucide lucide-pencil-icon lucide-pencil"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
                       <path d="m15 5 4 4" />
                     </svg>
                   </button>
-
                   <button
                     className="text-red-500 hover:text-red-700"
                     onClick={() => handleDelete(user.id)}
@@ -168,10 +194,9 @@ function Users() {
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="lucide lucide-trash2-icon lucide-trash-2"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <path d="M10 11v6" />
                       <path d="M14 11v6" />
