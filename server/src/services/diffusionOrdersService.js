@@ -30,7 +30,7 @@ async getAllDiffusionOrders() {
       "media_channels.channel_name"
     )
     .where("diffusion_orders.is_active", 1)
-    .orderBy("diffusion_orders.id", "desc");
+    .orderBy("diffusion_orders.id", "asc");
 
   return diffusionOrders;
 }
