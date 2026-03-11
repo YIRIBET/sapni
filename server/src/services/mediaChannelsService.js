@@ -11,7 +11,7 @@ class MediaChannelsService {
         "mc.channel_name",
         "mc.social_network",
         "mc.frequency",
-        "mc.contact_name",
+        "mc.razon_social",
         "mc.media_type_id",
         "mt.type_name",
       )
@@ -27,7 +27,7 @@ class MediaChannelsService {
         "mc.channel_name",
         "mc.social_network",
         "mc.frequency",
-        "mc.contact_name",
+        "mc.razon_social",
         "mc.media_type_id",
         "mt.type_name",
       )
@@ -55,8 +55,8 @@ class MediaChannelsService {
       channel_name: data.channel_name,
       social_network: data.social_network,
       frequency: data.frequency,
-      contact_name: data.contact_name,
       media_type_id: data.media_type_id,
+      razon_social:data.razon_social,
       is_active: 1,
     });
 
@@ -80,7 +80,7 @@ class MediaChannelsService {
       channel_name: data.channel_name,
       social_network: data.social_network,
       frequency: data.frequency,
-      contact_name: data.contact_name,
+      razon_social: data.razon_social,
       media_type_id: data.media_type_id,
     });
 
