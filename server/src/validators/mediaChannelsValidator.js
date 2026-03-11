@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const create = Joi.object({
   channel_name: Joi.string().max(150).required(),
-  social_network: Joi.string().max(50).allow(null, ''),
+  social_network: Joi.string().max(255).allow(null, ''),
   frequency: Joi.string().max(20).allow(null, ''),
   razon_social: Joi.string().max(100).allow(null, ''),
   media_type_id: Joi.number().integer().positive().required()
@@ -10,7 +10,7 @@ const create = Joi.object({
 
 const update = Joi.object({
   channel_name: Joi.string().max(150),
-  social_network: Joi.string().max(50).allow(null, ''),
+  social_network: Joi.string().max(255).allow(null, ''),
   frequency: Joi.string().max(20).allow(null, ''),
   razon_social: Joi.string().max(100).allow(null, ''),
   media_type_id: Joi.number().integer().positive()

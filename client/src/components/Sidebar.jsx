@@ -1,7 +1,14 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Sidebar() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
   return (
     <>
@@ -247,7 +254,7 @@ function Sidebar() {
 
                   <li>
                     <a
-                      href="#"
+                      onClick={handleLogout}
                       class="w-full rounded-lg px-4 py-2 [text-align:_inherit] text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                     >
                       Logout
