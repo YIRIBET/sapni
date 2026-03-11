@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { fetchClients, deleteClient } from "../../services/clientService";
 import ClientModal from "../../components/modals/clientModal";
 import Swal from "sweetalert2";
+import ExportPDFButton from "../../components/ExportPDFButton";
+import FilterDropdown from "../../components/FilterDropdown";
 
 function Clients() {
   const [clients, setClients] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [search, setSearch] = useState("");
+  const [filtroContacto, setFiltroContacto] = useState("Todos");
 
   useEffect(() => {
     loadClients();
@@ -26,12 +29,10 @@ function Clients() {
     setSelectedClient(null);
     setIsModalOpen(true);
   };
-
   const openModal = (client) => {
     setSelectedClient(client);
     setIsModalOpen(true);
   };
-
   const closeModal = () => {
     setSelectedClient(null);
     setIsModalOpen(false);
@@ -48,9 +49,7 @@ function Clients() {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
     });
-
     if (!result.isConfirmed) return;
-
     try {
       await deleteClient(clientId);
       await Swal.fire({
@@ -69,17 +68,37 @@ function Clients() {
     }
   };
 
-  const filteredClients = clients.filter((client) =>
-    `${client.company_name || ""} ${client.tax_id || ""} ${client.contact_person || ""}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const contactosDisponibles = [
+    "Todos",
+    ...new Set(clients.map((c) => c.contact_person).filter(Boolean)),
+  ];
+
+  const filteredClients = clients.filter((client) => {
+    const matchSearch =
+      `${client.company_name || ""} ${client.tax_id || ""} ${client.contact_person || ""}`
+        .toLowerCase()
+        .includes(search.toLowerCase());
+    const matchContacto =
+      filtroContacto === "Todos" || client.contact_person === filtroContacto;
+    return matchSearch && matchContacto;
+  });
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Clientes</h1>
 
       <div className="flex justify-end items-center mb-4 mr-4">
+        <ExportPDFButton
+          title="Reporte de Clientes"
+          filename="clientes.pdf"
+          columns={[
+            { label: "Empresa", key: "company_name" },
+            { label: "RFC", key: "tax_id" },
+            { label: "Contacto", key: "contact_person" },
+          ]}
+          rows={filteredClients}
+          filters={{ Contacto: filtroContacto, Búsqueda: search }}
+        />
         <button
           className="bg-[#1A6795] text-white px-4 py-2 rounded-md ml-2"
           onClick={openCreateModal}
@@ -112,6 +131,12 @@ function Clients() {
               className="bg-gray-100 rounded-md pl-10 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          <FilterDropdown
+            label="Contacto"
+            options={contactosDisponibles}
+            value={filtroContacto}
+            onChange={setFiltroContacto}
+          />
         </div>
 
         <table className="w-full bg-white rounded-lg shadow-md">
