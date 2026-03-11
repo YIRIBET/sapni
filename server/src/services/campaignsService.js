@@ -6,10 +6,8 @@ class campaignsService {
   formatCampaign(campaign) {
     const formatDate = (date) => {
       if (!date) return null;
-      if (typeof date === 'string') {
-        return date.split('T')[0];
-      }
-      return date.toISOString().split('T')[0];
+      if (typeof date === "string") return date.split("T")[0];
+      return date.toISOString().split("T")[0];
     };
 
     return {
@@ -18,8 +16,17 @@ class campaignsService {
       end_date: formatDate(campaign.end_date),
     };
   }
+  async deactivateExpiredCampaigns() {
+    const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+    await db("campaigns")
+      .where("is_active", 1)
+      .where("end_date", "<", today)
+      .update({ is_active: 0 });
+  }
 
   async getAllCampaigns() {
+    await this.deactivateExpiredCampaigns();
+
     const campaigns = await db("campaigns")
       .join("clients", "campaigns.client_id", "=", "clients.id")
       .select(
@@ -28,13 +35,12 @@ class campaignsService {
         "campaigns.start_date",
         "campaigns.end_date",
         "campaigns.client_id",
-        "clients.company_name",
-        "clients.is_active",
+        "campaigns.is_active",
+        "clients.company_name"
       )
-      .where("campaigns.is_active", 1)
       .orderBy("campaigns.id", "asc");
-    
-    return campaigns.map(c => this.formatCampaign(c));
+
+    return campaigns.map((c) => this.formatCampaign(c));
   }
 
   async getCampaignById(id) {
@@ -52,11 +58,11 @@ class campaignsService {
       .where("campaigns.id", id)
       .where("campaigns.is_active", 1)
       .first();
-    
+
     if (!campaign) {
       throw new NotFoundError("Campaña no encontrada");
     }
-    
+
     return this.formatCampaign(campaign);
   }
 
@@ -72,6 +78,11 @@ class campaignsService {
     if (!client) {
       throw new ValidationError("El cliente no existe o está inactivo");
     }
+    const today = new Date().toISOString().split("T")[0];
+    if (data.end_date < today) {
+      throw new ValidationError("La fecha de fin no puede ser una fecha pasada");
+    }
+
     const [id] = await db("campaigns").insert({
       campaign_name: data.campaign_name,
       start_date: data.start_date,
@@ -83,7 +94,6 @@ class campaignsService {
   }
 
   async updateCampaign(id, data) {
-  
     const errors = campaignsValidator.validateUpdate(data);
     if (errors.length > 0) {
       throw new ValidationError(errors.join(", "));
@@ -99,18 +109,36 @@ class campaignsService {
       const client = await db("clients")
         .where({ id: data.client_id, is_active: 1 })
         .first();
-
       if (!client) {
         throw new ValidationError("El cliente no existe o está inactivo");
       }
     }
-    await db("campaigns").where({ id: id }).update({
+
+    const today = new Date().toISOString().split("T")[0];
+    const isActive = data.end_date >= today ? 1 : 0;
+
+    await db("campaigns").where({ id }).update({
       campaign_name: data.campaign_name,
       start_date: data.start_date,
       end_date: data.end_date,
       client_id: data.client_id,
+      is_active: isActive,
     });
-    return this.getCampaignById(id);
+    const updated = await db("campaigns")
+      .join("clients", "campaigns.client_id", "=", "clients.id")
+      .select(
+        "campaigns.id",
+        "campaigns.campaign_name",
+        "campaigns.start_date",
+        "campaigns.end_date",
+        "campaigns.client_id",
+        "campaigns.is_active",
+        "clients.company_name"
+      )
+      .where("campaigns.id", id)
+      .first();
+
+    return this.formatCampaign(updated);
   }
 
   async deleteCampaign(id) {
@@ -120,7 +148,8 @@ class campaignsService {
     if (!campaign) {
       throw new NotFoundError("Campaña no encontrada");
     }
-    await db("campaigns").where({ id: id }).update({ is_active: 0 });
+    await db("campaigns").where({ id }).update({ is_active: 0 });
   }
 }
+
 module.exports = new campaignsService();
