@@ -11,6 +11,17 @@ export async function fetchCampaings() {
   return await res.json();
 }
 
+export async function fetchCampaingsActive() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/campaigns/active`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch campaigns");
+  return await res.json();
+}
+
 export async function createCampaing(campaignData) {
   const token = localStorage.getItem("token");
   const res = await fetch(`${API_URL}/campaigns/`, {

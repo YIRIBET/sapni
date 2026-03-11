@@ -20,6 +20,15 @@ class CampaignsController {
       next(error);
     }
   }
+
+  async getActiveCampaigns(req,res,next){
+    try{
+      const campaigns = await campaignsService.getActiveCampaigns();
+      sendSuccess(res, campaigns, "Campañas activas obtenidas correctamente");
+    }catch(error){
+      next(error);
+    }
+  }
   async create(req, res, next) {
     try {
       const campaign = await campaignsService.createCampaign(req.body);

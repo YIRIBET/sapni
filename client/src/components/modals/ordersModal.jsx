@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { createOrder, updateOrder } from "../../services/orderService";
-import { fetchCampaings } from "../../services/campaignService";
+import { fetchCampaingsActive } from "../../services/campaignService";
 import { fetchChannels } from "../../services/channelsService";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
@@ -28,7 +28,7 @@ const OrderModal = ({ order, onClose, onSuccess }) => {
     const loadData = async () => {
       try {
         const [campaignData, mediaData] = await Promise.all([
-          fetchCampaings(),
+          fetchCampaingsActive(),
           fetchChannels(),
         ]);
         setCampaigns(Array.isArray(campaignData) ? campaignData : campaignData.data);

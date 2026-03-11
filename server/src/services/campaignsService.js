@@ -16,8 +16,9 @@ class campaignsService {
       end_date: formatDate(campaign.end_date),
     };
   }
+
   async deactivateExpiredCampaigns() {
-    const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+    const today = new Date().toISOString().split("T")[0];
     await db("campaigns")
       .where("is_active", 1)
       .where("end_date", "<", today)
@@ -38,6 +39,26 @@ class campaignsService {
         "campaigns.is_active",
         "clients.company_name"
       )
+      .orderBy("campaigns.id", "asc");
+
+    return campaigns.map((c) => this.formatCampaign(c));
+  }
+  
+  async getActiveCampaigns() {
+    await this.deactivateExpiredCampaigns();
+
+    const campaigns = await db("campaigns")
+      .join("clients", "campaigns.client_id", "=", "clients.id")
+      .select(
+        "campaigns.id",
+        "campaigns.campaign_name",
+        "campaigns.start_date",
+        "campaigns.end_date",
+        "campaigns.client_id",
+        "campaigns.is_active",
+        "clients.company_name"
+      )
+      .where("campaigns.is_active", 1)
       .orderBy("campaigns.id", "asc");
 
     return campaigns.map((c) => this.formatCampaign(c));
