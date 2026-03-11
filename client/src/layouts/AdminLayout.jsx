@@ -5,11 +5,11 @@ import React from "react";
 function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-[#E6EAF3]">
-      <aside className="fixed top-0 left-0 h-screen w-54 bg-white">
-        <Sidebar />
-      </aside>
+      {/* Sidebar: fixed en ambas resoluciones, oculto via transform en móvil */}
+      <Sidebar />
 
-      <main className="ml-54 p-2 overflow-y-auto flex-1 bg-[#E6EAF3] w-full">
+      {/* Main: sin margen en móvil, con margen de 256px (w-64) en desktop */}
+      <main className="flex-1 lg:ml-64 ml-0 pt-14 lg:pt-0 p-2 overflow-y-auto bg-[#E6EAF3] min-h-screen w-full">
         <Outlet />
       </main>
     </div>
