@@ -97,7 +97,7 @@ function Dashboard() {
 
   return (
     <div>
-      <div className="grid grid-cols-4 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {mediaTypeCounts.map((item) => (
           <div
             key={item.media_type_id}
@@ -121,7 +121,6 @@ function Dashboard() {
         {orderProgress.map((order) => {
           const realProgress = Number(order.progress_percentage) || 0;
 
-          // límite visual para la barra
           const progress = Math.min(realProgress, 100);
 
           const colorClass = getProgressColor(progress);
@@ -154,7 +153,7 @@ function Dashboard() {
           );
         })}
       </div>
-      <div className="grid col-grid grid-cols-2 md:grid-cols-3 gap-4 justify-center items-center mt-4 ">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
         <div className="bg-white rounded-lg shadow p-4 min-h-full">
           <h2 className="text-sm font-medium text-gray-600 mb-5">
             Notas por estado
