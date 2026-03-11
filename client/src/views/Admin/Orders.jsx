@@ -93,7 +93,6 @@ function Orders() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Ordenes</h1>
-
       <div className="flex justify-end items-center mb-4 mr-4">
         <ExportPDFButton
           title="Reporte de Órdenes"
@@ -124,8 +123,8 @@ function Orders() {
       </div>
 
       <div className="mb-8">
-        <div className="flex gap-4 sm:gap-6 mb-4 justify-between items-center">
-          <div className="relative w-1/2">
+         <div className="flex flex-col lg:flex-row gap-3 mb-4 lg:justify-between lg:items-center">
+          <div className="relative w-full lg:w-1/3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -163,7 +162,8 @@ function Orders() {
           </div>
         </div>
 
-        <table className="w-full bg-white rounded-lg shadow-md">
+        <div className="overflow-x-auto">
+          <table className="min-w-[700px] w-full bg-white rounded-lg shadow-md">
           <thead>
             <tr className="bg-gray-100 text-left">
               <th className="py-2 px-4">ID</th>
@@ -234,6 +234,7 @@ function Orders() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {isModalOpen && (
           <OrderModal

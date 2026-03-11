@@ -101,8 +101,8 @@ function Campaings() {
       </div>
 
       <div className="mb-8">
-        <div className="flex gap-4 sm:gap-6 mb-4 justify-between items-center">
-          <div className="relative w-1/2">
+         <div className="flex flex-col lg:flex-row gap-3 mb-4 lg:justify-between lg:items-center">
+          <div className="relative w-full lg:w-1/3">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
               className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
@@ -125,7 +125,8 @@ function Campaings() {
           />
         </div>
 
-        <table className="w-full bg-white rounded-lg shadow-md">
+       <div className="overflow-x-auto">
+          <table className="min-w-[700px] w-full bg-white rounded-lg shadow-md">
           <thead>
             <tr className="bg-gray-100 text-left">
               <th className="py-2 px-4">Nombre de la campaña</th>
@@ -172,6 +173,7 @@ function Campaings() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {isModalOpen && (
           <CampaignModal campaign={selectedCampaign} onClose={closeModal} onSuccess={loadCampaings} />
