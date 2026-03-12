@@ -1,16 +1,18 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import logo from "../assets/logoIncognita.png";
 
 export function useExportPDF() {
   const exportToPDF = ({ title, columns, rows, filename = "reporte.pdf", filters = {} }) => {
     const doc = new jsPDF();
 
-    doc.setFillColor(26, 103, 149);
-    doc.rect(0, 0, 210, 22, "F");
-    doc.setTextColor(255, 255, 255);
+    doc.setFillColor(210, 228, 240);
+    doc.rect(0, 0, 210, 28, "F");
+    doc.addImage(logo, "PNG", 8, 6, 35, 16);
+    doc.setTextColor(26, 103, 149);
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text(title, 14, 14);
+    doc.text(title, 70, 17);
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.text(
@@ -27,10 +29,10 @@ export function useExportPDF() {
     doc.setTextColor(100);
     doc.setFontSize(9);
     const filterText = `Total: ${rows.length} registro(s)${activeFilters ? "  |  " + activeFilters : ""}`;
-    doc.text(filterText, 14, 30);
+    doc.text(filterText, 14, 36);
 
     autoTable(doc, {
-      startY: 35,
+      startY: 41,
       head: [columns.map((c) => c.label)],
       body: rows.map((row) => columns.map((c) => row[c.key] ?? "—")),
       headStyles: {
