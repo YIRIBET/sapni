@@ -1,6 +1,7 @@
 const db = require("../config/database");
 const { NotFoundError, ValidationError } = require("../utils/errors");
 const diffusionOrdersValidator = require("../validators/diffusionOrdersValidator");
+const campaignsService = require("./campaignsService");
 
 class diffusionOrdersService {
 async getAllDiffusionOrders() {
@@ -77,7 +78,16 @@ async getDiffusionOrderById(id) {
   return diffusionOrder;
 }
 
+async deactivateExpiredCampaigns() {
+  const today = new Date().toISOString().split("T")[0];
+  await db("campaigns")
+    .where("is_active", 1)
+    .where("end_date", "<", today)
+    .update({ is_active: 0 });
+}
+
 async getAllDiffusionOrdersByMediaType(media_type_id) {
+  await this.deactivateExpiredCampaigns();
 
   const orders = await db("diffusion_orders")
     .join("campaigns", "diffusion_orders.campaign_id", "campaigns.id")
@@ -93,11 +103,11 @@ async getAllDiffusionOrdersByMediaType(media_type_id) {
     )
     .where("media_channels.media_type_id", media_type_id)
     .where("diffusion_orders.is_active", 1)
+    .where("campaigns.is_active", 1)
     .orderBy("diffusion_orders.id", "desc");
 
   return orders;
 }
-
   async createDiffusionOrder(data) {
     const errors = diffusionOrdersValidator.validateCreate(data);
     if (errors.length > 0) {
