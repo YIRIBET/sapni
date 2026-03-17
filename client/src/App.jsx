@@ -13,6 +13,7 @@ import Campaings from "./views/Admin/Campaigns";
 import Orders from "./views/Admin/Orders";
 import Medios from "./views/Admin/Channels";
 import Evidences from "./views/Admin/EvidencesRecords";
+import OrderProgress from "./components/progressOrder";
 
 import AdminLayout from "./layouts/AdminLayout";
 import AuditorLayout from "./layouts/AuditorLayout";
@@ -50,6 +51,7 @@ function App() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/medios" element={<Medios />} />
           <Route path="/evidencias" element={<Evidences/>} />
+          <Route path="/order-progress" element={<OrderProgress />} />
         </Route>
         
 

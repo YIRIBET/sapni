@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   fetchCountUserEvidence,
   fetchCountByMediaChannel,
@@ -10,8 +9,60 @@ import {
 } from "../../services/EvidenceService";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
+import OrderProgressModal from "../../components/progressOrder";
+import { useNavigate } from "react-router-dom";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+const getProgressColor = (percentage) => {
+  if (percentage < 25) return "bg-red-500";
+  if (percentage < 70) return "bg-yellow-400";
+  if (percentage < 90) return "bg-green-400";
+  return "bg-green-600";
+};
+
+const getHighlightedOrders = (orders) => {
+  const highlighted = [];
+  const used = new Set();
+
+  const anomaly = orders.find((o) => Number(o.progress_percentage) > 100);
+  if (anomaly) {
+    highlighted.push({ ...anomaly, _tag: "anomalia" });
+    used.add(anomaly.order_id);
+  }
+
+  const low = orders.find(
+    (o) => !used.has(o.order_id) && Number(o.progress_percentage) < 25,
+  );
+  if (low) {
+    highlighted.push({ ...low, _tag: "bajo" });
+    used.add(low.order_id);
+  }
+
+  const mid = orders.find(
+    (o) =>
+      !used.has(o.order_id) &&
+      Number(o.progress_percentage) >= 25 &&
+      Number(o.progress_percentage) <= 75,
+  );
+  if (mid) {
+    highlighted.push({ ...mid, _tag: "medio" });
+    used.add(mid.order_id);
+  }
+
+  const high = orders.find(
+    (o) =>
+      !used.has(o.order_id) &&
+      Number(o.progress_percentage) > 75 &&
+      Number(o.progress_percentage) <= 100,
+  );
+  if (high) {
+    highlighted.push({ ...high, _tag: "alto" });
+    used.add(high.order_id);
+  }
+
+  return highlighted;
+};
 
 function Dashboard() {
   const [evidence, setEvidence] = useState([]);
@@ -21,6 +72,8 @@ function Dashboard() {
   const [mediaTypeCounts, setMediaTypeCounts] = useState([]);
   const [statusCounts, setStatusCounts] = useState([]);
   const [orderProgress, setOrderProgress] = useState([]);
+  const [showAllOrders, setShowAllOrders] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadEvidence = async () => {
@@ -33,7 +86,6 @@ function Dashboard() {
         setLoading(false);
       }
     };
-
     loadEvidence();
   }, []);
 
@@ -53,7 +105,6 @@ function Dashboard() {
           fetchCountsByStatus(),
           fetchProgressByOrder(),
         ]);
-
         setCountUserEvidence(countUserEvidence);
         setMediaChannelCounts(mediaChannelCounts);
         setMediaTypeCounts(mediaTypeCounts);
@@ -63,9 +114,10 @@ function Dashboard() {
         console.error("Error loading dashboard data", error);
       }
     };
-
     loadDashboardData();
   }, []);
+
+  const highlightedOrders = getHighlightedOrders(orderProgress);
 
   const statusChartData = {
     labels: statusCounts.map((s) => s.status_name),
@@ -80,19 +132,8 @@ function Dashboard() {
   const options = {
     responsive: true,
     plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          boxWidth: 12,
-        },
-      },
+      legend: { position: "bottom", labels: { boxWidth: 12 } },
     },
-  };
-  const getProgressColor = (percentage) => {
-    if (percentage < 25) return "bg-red-500";
-    if (percentage < 70) return "bg-yellow-400";
-    if (percentage < 90) return "bg-green-400";
-    return "bg-green-600";
   };
 
   return (
@@ -112,38 +153,45 @@ function Dashboard() {
       </div>
 
       <div className="bg-white rounded-lg mt-4 p-4">
-        <div className="mt-4 flex justify-between items-center mb-1">
+        <div className="mt-4 flex justify-between items-center mb-3">
           <p className="text-xl font-bold">Progreso diario</p>
-          <button className="text-sm text-blue-500 hover:text-blue-700 hover:bg-blue-100 hover:rounded-md px-2 py-1">
-            Ver todos
+          <button
+            onClick={() => navigate("/order-progress")}
+            className="text-sm text-blue-500 hover:text-blue-700 hover:bg-blue-100 hover:rounded-md px-2 py-1"
+          >
+            Ver todos ({orderProgress.length})
           </button>
         </div>
-        {orderProgress.map((order) => {
+
+        {highlightedOrders.length === 0 && (
+          <p className="text-sm text-gray-400 text-center py-4">
+            Sin órdenes disponibles
+          </p>
+        )}
+
+        {highlightedOrders.map((order) => {
           const realProgress = Number(order.progress_percentage) || 0;
-
           const progress = Math.min(realProgress, 100);
-
           const colorClass = getProgressColor(progress);
 
           return (
             <div key={order.order_id} className="mb-4">
-              <div className="flex justify-between text-sm mb-1">
-                <span>Orden #{order.order_id}</span>
-
+              <div className="flex justify-between text-sm mb-1 items-center">
+                <div className="flex items-center gap-2">
+                  <span>Orden #{order.order_id}</span>
+                </div>
                 <span className="font-medium">
                   {realProgress > 100
                     ? `100% (+${Math.round(realProgress - 100)}%)`
                     : `${realProgress}%`}
                 </span>
               </div>
-
               <div className="w-full bg-gray-200 h-3 rounded">
                 <div
                   className={`${colorClass} h-3 rounded transition-all duration-500`}
                   style={{ width: `${progress}%` }}
                 />
               </div>
-
               {realProgress > 100 && (
                 <p className="text-xs text-red-500 mt-1">
                   Evidencias adicionales detectadas
@@ -173,7 +221,6 @@ function Dashboard() {
                 <span className="text-sm text-gray-700 font-medium">
                   {item.channel_name}
                 </span>
-
                 <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                   {item.total_evidences}
                 </span>
@@ -185,7 +232,6 @@ function Dashboard() {
           <h2 className="text-sm font-semibold text-gray-700 mb-4">
             Usuarios más activos
           </h2>
-
           <ul className="space-y-3">
             {countUserEvidence.map((item) => (
               <li
@@ -196,12 +242,10 @@ function Dashboard() {
                   <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">
                     {item.user_name.charAt(0).toUpperCase()}
                   </div>
-
                   <span className="text-sm text-gray-700">
                     {item.user_name}
                   </span>
                 </div>
-
                 <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-1 rounded-full">
                   {item.total_evidences}
                 </span>
@@ -210,7 +254,14 @@ function Dashboard() {
           </ul>
         </div>
       </div>
+      {showAllOrders && (
+        <OrderProgressModal
+          orders={orderProgress}
+          onClose={() => setShowAllOrders(false)}
+        />
+      )}
     </div>
   );
 }
+
 export default Dashboard;
