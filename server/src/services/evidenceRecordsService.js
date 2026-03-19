@@ -61,24 +61,32 @@ class EvidenceRecordsService {
       );
   }
 
-  async getProgressByOrder() {
-    return db("diffusion_orders as do")
-      .leftJoin("evidence_records as er", "er.order_id", "do.id")
-      .groupBy("do.id", "do.campaign_id", "do.total_spots_ordered")
-      .select(
-        "do.id as order_id",
-        "do.campaign_id",
-        "do.total_spots_ordered",
-        db.raw("COUNT(er.id) as evidences_done"),
-        db.raw(`
+ async getProgressByOrder() {
+  return db("diffusion_orders as do")
+    .leftJoin("evidence_records as er", "er.order_id", "do.id")
+    .leftJoin("campaigns as c", "c.id", "do.campaign_id")
+    .leftJoin("media_channels as mc", "mc.id", "do.media_channel_id")
+    .groupBy(
+      "do.id",
+      "do.campaign_id",
+      "do.total_spots_ordered",
+      "c.campaign_name",
+      "mc.channel_name" 
+    )
+    .select(
+      "do.id as order_id",
+      "c.campaign_name",
+      "mc.channel_name",
+      "do.total_spots_ordered",
+      db.raw("COUNT(er.id) as evidences_done"),
+      db.raw(`
         ROUND(
           (COUNT(er.id) / do.total_spots_ordered) * 100,
           2
         ) as progress_percentage
-      `),
-      );
-  }
-
+      `)
+    );
+}
   async getCountsByStatus() {
     return db("review_status as rs")
       .leftJoin("evidence_records as er", "er.status_id", "rs.id")

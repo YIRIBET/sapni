@@ -178,7 +178,9 @@ function Dashboard() {
             <div key={order.order_id} className="mb-4">
               <div className="flex justify-between text-sm mb-1 items-center">
                 <div className="flex items-center gap-2">
-                  <span>Orden #{order.order_id}</span>
+                   <span className="font-medium">
+                    {order.campaign_name} - {order.channel_name}
+                  </span>
                 </div>
                 <span className="font-medium">
                   {realProgress > 100

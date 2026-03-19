@@ -109,10 +109,9 @@ export default function EvidenceForm() {
         {({ errors, touched }) => (
           <Form className="space-y-6">
 
-            {/* ORDEN */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Orden de difusión
+                campaña de difusión
               </label>
 
               <Field
@@ -136,7 +135,6 @@ export default function EvidenceForm() {
               />
             </div>
 
-            {/* RADIO */}
             {mediaType === 1 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -158,8 +156,6 @@ export default function EvidenceForm() {
                 />
               </div>
             )}
-
-            {/* PUBLICACION */}
             {[2, 3, 4].includes(mediaType) && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -182,7 +178,6 @@ export default function EvidenceForm() {
               </div>
             )}
 
-            {/* LINK */}
             {[2, 3].includes(mediaType) && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -201,8 +196,6 @@ export default function EvidenceForm() {
                 />
               </div>
             )}
-
-            {/* ESTADO */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Estado
