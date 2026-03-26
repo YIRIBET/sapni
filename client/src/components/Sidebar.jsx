@@ -1,10 +1,11 @@
 import React, { useState } from "react";
+import logo from "../assets/logoIncognita.png";
 import { useNavigate } from "react-router-dom";
 
 function Sidebar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -17,7 +18,22 @@ function Sidebar() {
         className="lg:hidden fixed top-4 left-4 z-50 bg-white border border-gray-200 rounded-md p-2 shadow-sm"
         aria-label="Abrir menú"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-menu-icon lucide-menu"
+        >
+          <path d="M4 5h16" />
+          <path d="M4 12h16" />
+          <path d="M4 19h16" />
+        </svg>
       </button>
 
       {open && (
@@ -43,9 +59,9 @@ function Sidebar() {
         <div className="px-4 py-6">
           <span className="flex h-10 w-full justify-center items-center mb-6">
             <img
-              src="/src/assets/logoIncognita.png"
+              src={logo}
               alt="Incognita Logo"
-              className="w-32 object-contain"
+              className="w-40 sm:w-52 object-contain"
             />
           </span>
 
@@ -212,79 +228,31 @@ function Sidebar() {
                 <p className="ml-4">Evidencias</p>
               </a>
             </li>
-            <li>
-              <details class="group [&amp;_summary::-webkit-details-marker]:hidden">
-                <summary class="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                  <span class="text-sm font-medium"> Account </span>
-
-                  <span class="shrink-0 transition duration-300 group-open:-rotate-180">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="size-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
-                  </span>
-                </summary>
-
-                <ul class="mt-2 space-y-1 px-4">
-                  <li>
-                    <a
-                      href="#"
-                      class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                    >
-                      Details
-                    </a>
-                  </li>
-
-                  <li>
-                    <a
-                      href="#"
-                      class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                    >
-                      Security
-                    </a>
-                  </li>
-
-                  <li>
-                    <a
-                      onClick={handleLogout}
-                      class="w-full rounded-lg px-4 py-2 [text-align:_inherit] text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                    >
-                      Logout
-                    </a>
-                  </li>
-                </ul>
-              </details>
-            </li>
           </ul>
         </div>
 
         <div className="border-t border-gray-100 p-4">
-          <a
-            href="#"
-            className="flex items-center gap-2 bg-white hover:bg-gray-50 rounded-lg p-2 transition-colors"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700"
           >
-            <img
-              alt="Eric Frusciante"
-              src="https://images.unsplash.com/photo-1600486913747-55e5470d6f40"
-              className="size-10 rounded-full object-cover"
-            />
-            <div>
-              <p className="text-xs text-gray-500">
-                <strong className="block font-medium text-gray-700">
-                  Eric Frusciante
-                </strong>
-                <span>eric@frusciante.com</span>
-              </p>
-            </div>
-          </a>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Cerrar sesión
+          </button>
         </div>
       </div>
     </>

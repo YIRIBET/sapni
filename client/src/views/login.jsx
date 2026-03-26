@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext.jsx";
 import { loginService } from "../services/AuthServices.js";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import logo from '../assets/logoIncognita.png'
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 
@@ -27,9 +28,8 @@ function Login() {
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-[#E6EAF3] px-4">
-
       <img
-        src="/src/assets/logoIncognita.png"
+        src={logo}
         alt="Incognita Logo"
         className="w-40 sm:w-52 object-contain"
       />
@@ -39,21 +39,16 @@ function Login() {
       </h1>
 
       <div className="rounded-lg p-8 bg-white shadow-lg w-full max-w-md">
-
-        <p className="font-bold text-xl text-center mb-6">
-          Iniciar sesión
-        </p>
+        <p className="font-bold text-xl text-center mb-6">Iniciar sesión</p>
 
         <Formik
           initialValues={{ email: "", password: "" }}
           validationSchema={loginSchema}
           onSubmit={async (values, { setSubmitting, setStatus }) => {
-
             try {
-
               const { token, role } = await loginService(
                 values.email,
-                values.password
+                values.password,
               );
 
               login(token);
@@ -70,23 +65,15 @@ function Login() {
               } else if (role === "AUDITOR") {
                 navigate("/auditor/home");
               }
-
             } catch (err) {
-
               setStatus("Correo o contraseña incorrectos");
-
             } finally {
-
               setSubmitting(false);
-
             }
-
           }}
         >
           {({ errors, touched, isSubmitting, status }) => (
-
             <Form className="space-y-4">
-
               {status && (
                 <div className="bg-red-100 text-red-700 p-2 rounded text-sm text-center">
                   {status}
@@ -99,7 +86,7 @@ function Login() {
                 <Field
                   name="email"
                   type="email"
-                  placeholder="usuario@laboratorio.com"
+                  placeholder="usuario@ipro.com"
                   className={inputClass(errors.email, touched.email)}
                 />
 
@@ -114,7 +101,6 @@ function Login() {
                 <label className="text-sm font-medium">Contraseña</label>
 
                 <div className="relative">
-
                   <Field
                     name="password"
                     type={showPassword ? "text" : "password"}
@@ -127,9 +113,42 @@ function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                   >
-                    {showPassword ? <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off-icon lucide-eye-off"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>}
+                    {showPassword ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-eye-off-icon lucide-eye-off"
+                      >
+                        <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+                        <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+                        <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+                        <path d="m2 2 20 20" />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-eye-icon lucide-eye"
+                      >
+                        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
                   </button>
-
                 </div>
 
                 <ErrorMessage
@@ -151,12 +170,9 @@ function Login() {
               >
                 {isSubmitting ? "Cargando..." : "Iniciar sesión"}
               </button>
-
             </Form>
-
           )}
         </Formik>
-
       </div>
     </div>
   );

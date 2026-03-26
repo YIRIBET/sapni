@@ -43,17 +43,15 @@ export default function EvidenceForm() {
         ? Yup.string().required("El nombre del programa es obligatorio")
         : Yup.string(),
 
-    publication_title:
-      [2, 3, 4].includes(mediaType)
-        ? Yup.string().required("El título es obligatorio")
-        : Yup.string(),
+    publication_title: [2, 3, 4].includes(mediaType)
+      ? Yup.string().required("El título es obligatorio")
+      : Yup.string(),
 
-    link:
-      [2, 3].includes(mediaType)
-        ? Yup.string()
-            .url("Debe ser un enlace válido")
-            .required("El enlace es obligatorio")
-        : Yup.string(),
+    link: [2, 3].includes(mediaType)
+      ? Yup.string()
+          .url("Debe ser un enlace válido")
+          .required("El enlace es obligatorio")
+      : Yup.string(),
   });
 
   const initialValues = {
@@ -78,22 +76,41 @@ export default function EvidenceForm() {
         : "border-gray-300"
     }`;
 
-  const handleSubmit = async (values, { resetForm }) => {
-    try {
-      await createEvidence(values);
+  const Toast = Swal.mixin({
+  toast: true,
+  position: "bottom-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+});
 
-      Swal.fire({
-        icon: "success",
-        title: "Evidencia registrada",
-        text: "La evidencia fue guardada correctamente",
-        confirmButtonColor: "#1A6795",
+const handleSubmit = async (values, { resetForm }) => {
+  try {
+    await createEvidence(values);
+
+    Toast.fire({
+      icon: "success",
+      title: "Evidencia registrada correctamente",
+    });
+
+    resetForm();
+  } catch (error) {
+    const errData = error.response?.data;
+
+    if (errData?.errors) {
+      const mensajes = Object.values(errData.errors).join(", ");
+      Toast.fire({
+        icon: "error",
+        title: mensajes,
       });
-
-      resetForm();
-    } catch (error) {
-      console.error(error);
+    } else {
+      Toast.fire({
+        icon: "error",
+        title: "Ocurrió un error al guardar la evidencia",
+      });
     }
-  };
+  }
+};
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-md">
@@ -108,7 +125,6 @@ export default function EvidenceForm() {
       >
         {({ errors, touched }) => (
           <Form className="space-y-6">
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 campaña de difusión
@@ -123,7 +139,7 @@ export default function EvidenceForm() {
 
                 {orders.map((order) => (
                   <option key={order.id} value={order.id}>
-                    {order.campaign_name} - {order.channel_name}
+                    {order.campaign_name}
                   </option>
                 ))}
               </Field>
@@ -145,7 +161,7 @@ export default function EvidenceForm() {
                   name="program_name"
                   className={inputClass(
                     errors.program_name,
-                    touched.program_name
+                    touched.program_name,
                   )}
                 />
 
@@ -166,7 +182,7 @@ export default function EvidenceForm() {
                   name="publication_title"
                   className={inputClass(
                     errors.publication_title,
-                    touched.publication_title
+                    touched.publication_title,
                   )}
                 />
 
@@ -247,7 +263,6 @@ export default function EvidenceForm() {
 
             {/* FECHA Y HORA */}
             <div className="grid md:grid-cols-2 gap-4">
-
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
                   Fecha
@@ -258,7 +273,7 @@ export default function EvidenceForm() {
                   name="evidence_date"
                   className={inputClass(
                     errors.evidence_date,
-                    touched.evidence_date
+                    touched.evidence_date,
                   )}
                 />
 
@@ -279,7 +294,7 @@ export default function EvidenceForm() {
                   name="evidence_time"
                   className={inputClass(
                     errors.evidence_time,
-                    touched.evidence_time
+                    touched.evidence_time,
                   )}
                 />
 
@@ -289,7 +304,6 @@ export default function EvidenceForm() {
                   className="text-red-500 text-sm"
                 />
               </div>
-
             </div>
 
             {/* NOTAS */}
@@ -302,7 +316,10 @@ export default function EvidenceForm() {
                 as="textarea"
                 name="internal_notes"
                 rows="4"
-                className="w-full border border-gray-300 rounded-lg p-2.5"
+                className={inputClass(
+                  errors.internal_notes,
+                  touched.internal_notes,
+                )}
               />
             </div>
 
@@ -314,7 +331,6 @@ export default function EvidenceForm() {
                 Guardar
               </button>
             </div>
-
           </Form>
         )}
       </Formik>

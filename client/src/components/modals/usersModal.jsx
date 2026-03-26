@@ -121,9 +121,9 @@ const UsersModal = ({ user, onClose, onSuccess }) => {
                   <option value="">Selecciona un medio</option>
                   <option value="1">Radio</option>
                   <option value="2">Redes Sociales</option>
-                  <option value="3">Website</option>
-                  <option value="4">TV</option>
-                  <option value="5">Periódico</option>
+                  <option value="3">TV</option>
+                  <option value="4">Periódico</option>
+                  <option value="5">Otro</option>
                 </Field>
                 <ErrorMessage name="media_type_id" component="p" className="text-red-500 text-sm" />
               </div>
