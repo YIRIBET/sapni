@@ -26,7 +26,7 @@ module.exports = {
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       port: process.env.DB_PORT,
-      timezone: process.env.DB_TIMEZONE || '+00:00'
+      timezone: process.env.DB_TIMEZONE,
     },
     migrations: {
       directory: './src/database/migrations'

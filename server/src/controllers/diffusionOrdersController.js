@@ -12,6 +12,16 @@ class DiffusionOrdersController {
     }
   }
 
+  async getAllOrdersbyCampaignActive (req,res,next){
+    try{
+      const diffusionOrders =
+        await diffusionOrdersService.getAllOrdersbyCampaignActive();
+        sendSuccess(res,diffusionOrders);
+    }catch(error) {
+      next(error);
+    }
+  }
+
   async getById(req, res, next) {
     try {
       const { id } = req.params;
@@ -22,22 +32,6 @@ class DiffusionOrdersController {
       next(error);
     }
   }
-
- async getOrdersByMediaType(req, res) {
-  try {
-
-    const { media_type_id } = req.params;
-
-    const orders =
-      await diffusionOrdersService.getAllDiffusionOrdersByMediaType(media_type_id);
-
-    res.json(orders);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-}
 
   async create(req, res, next) {
     try {

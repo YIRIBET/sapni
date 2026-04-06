@@ -3,33 +3,25 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 import { createEvidence } from "../services/EvidenceService";
-import { getOrdersByMediaType } from "../services/orderService";
+import { getOrdersbyCampaignActive } from "../services/orderService";
 
 export default function EvidenceForm() {
   const [mediaType, setMediaType] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
-    const mediaTypeId = localStorage.getItem("mediaTypeId");
-    if (mediaTypeId) {
-      setMediaType(Number(mediaTypeId));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!mediaType) return;
-
     const fetchOrders = async () => {
       try {
-        const data = await getOrdersByMediaType(mediaType);
-        setOrders(data);
+        const data = await getOrdersbyCampaignActive();
+        setOrders(Array.isArray(data) ? data : data.data || []);
       } catch (error) {
         console.error(error);
       }
     };
 
     fetchOrders();
-  }, [mediaType]);
+  }, []);
 
   const validationSchema = Yup.object({
     order_id: Yup.string().required("Debes seleccionar una orden"),
@@ -77,40 +69,42 @@ export default function EvidenceForm() {
     }`;
 
   const Toast = Swal.mixin({
-  toast: true,
-  position: "bottom-end",
-  showConfirmButton: false,
-  timer: 3000,
-  timerProgressBar: true,
-});
+    toast: true,
+    position: "bottom-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+  });
 
-const handleSubmit = async (values, { resetForm }) => {
-  try {
-    await createEvidence(values);
+  const handleSubmit = async (values, { resetForm }) => {
+    try {
+      await createEvidence(values);
 
-    Toast.fire({
-      icon: "success",
-      title: "Evidencia registrada correctamente",
-    });
-
-    resetForm();
-  } catch (error) {
-    const errData = error.response?.data;
-
-    if (errData?.errors) {
-      const mensajes = Object.values(errData.errors).join(", ");
       Toast.fire({
-        icon: "error",
-        title: mensajes,
+        icon: "success",
+        title: "Evidencia registrada correctamente",
       });
-    } else {
-      Toast.fire({
-        icon: "error",
-        title: "Ocurrió un error al guardar la evidencia",
-      });
+
+      resetForm();
+      setMediaType(null);
+      setSelectedOrder(null);
+    } catch (error) {
+      const errData = error.response?.data;
+
+      if (errData?.errors) {
+        const mensajes = Object.values(errData.errors).join(", ");
+        Toast.fire({
+          icon: "error",
+          title: mensajes,
+        });
+      } else {
+        Toast.fire({
+          icon: "error",
+          title: "Ocurrió un error al guardar la evidencia",
+        });
+      }
     }
-  }
-};
+  };
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-md">
@@ -123,17 +117,27 @@ const handleSubmit = async (values, { resetForm }) => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ errors, touched }) => (
+        {({ errors, touched, setFieldValue }) => (
           <Form className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                campaña de difusión
+                Campaña de difusión
               </label>
 
               <Field
                 as="select"
                 name="order_id"
                 className={inputClass(errors.order_id, touched.order_id)}
+                onChange={(e) => {
+                  const orderId = e.target.value;
+
+                  setFieldValue("order_id", orderId);
+
+                  const order = orders.find((o) => o.id == orderId);
+
+                  setSelectedOrder(order);
+                  setMediaType(order?.media_type_id || null);
+                }}
               >
                 <option value="">Selecciona una orden</option>
 
@@ -156,15 +160,13 @@ const handleSubmit = async (values, { resetForm }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nombre del programa
                 </label>
-
                 <Field
                   name="program_name"
                   className={inputClass(
                     errors.program_name,
-                    touched.program_name,
+                    touched.program_name
                   )}
                 />
-
                 <ErrorMessage
                   name="program_name"
                   component="p"
@@ -177,15 +179,13 @@ const handleSubmit = async (values, { resetForm }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Título de la publicación
                 </label>
-
                 <Field
                   name="publication_title"
                   className={inputClass(
                     errors.publication_title,
-                    touched.publication_title,
+                    touched.publication_title
                   )}
                 />
-
                 <ErrorMessage
                   name="publication_title"
                   component="p"
@@ -199,12 +199,10 @@ const handleSubmit = async (values, { resetForm }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Enlace
                 </label>
-
                 <Field
                   name="link"
                   className={inputClass(errors.link, touched.link)}
                 />
-
                 <ErrorMessage
                   name="link"
                   component="p"
@@ -216,7 +214,6 @@ const handleSubmit = async (values, { resetForm }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Estado
               </label>
-
               <Field
                 as="select"
                 name="status_id"
@@ -228,20 +225,11 @@ const handleSubmit = async (values, { resetForm }) => {
                 <option value="3">Neutral</option>
                 <option value="4">Reporte</option>
               </Field>
-
-              <ErrorMessage
-                name="status_id"
-                component="p"
-                className="text-red-500 text-sm"
-              />
             </div>
-
-            {/* FORMATO */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Formato
               </label>
-
               <Field
                 as="select"
                 name="format_id"
@@ -253,15 +241,7 @@ const handleSubmit = async (values, { resetForm }) => {
                 <option value="3">Spot</option>
                 <option value="4">Texto</option>
               </Field>
-
-              <ErrorMessage
-                name="format_id"
-                component="p"
-                className="text-red-500 text-sm"
-              />
             </div>
-
-            {/* FECHA Y HORA */}
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
@@ -305,8 +285,6 @@ const handleSubmit = async (values, { resetForm }) => {
                 />
               </div>
             </div>
-
-            {/* NOTAS */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Notas internas

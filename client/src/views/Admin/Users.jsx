@@ -11,7 +11,6 @@ function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState("");
-  const [filtroMedio, setFiltroMedio] = useState("Todos");
 
   useEffect(() => {
     async function loadUsers() {
@@ -77,18 +76,11 @@ function Users() {
     }
   };
 
-  const mediosDisponibles = [
-    "Todos",
-    ...new Set(users.map((u) => u.type_name).filter(Boolean)),
-  ];
-
   const filteredUsers = users.filter((user) => {
     const matchSearch = `${user.nombre} ${user.apellidos} ${user.email}`
       .toLowerCase()
       .includes(search.toLowerCase());
-    const matchMedio =
-      filtroMedio === "Todos" || user.type_name === filtroMedio;
-    return matchSearch && matchMedio;
+    return matchSearch ;
   });
 
   return (
@@ -101,10 +93,8 @@ function Users() {
           columns={[
             { label: "Nombre", key: "nombre" },
             { label: "Correo", key: "email" },
-            { label: "Medio", key: "type_name" },
           ]}
           rows={filteredUsers}
-          filters={{ Medio: filtroMedio, Búsqueda: search }}
         />
 
         <button
@@ -139,14 +129,7 @@ function Users() {
               className="bg-gray-100 rounded-md pl-10 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <FilterDropdown
-              label="Medio"
-              options={mediosDisponibles}
-              value={filtroMedio}
-              onChange={setFiltroMedio}
-            />
-          </div>
+        
         </div>
 
         <div className="overflow-x-auto">
@@ -155,7 +138,6 @@ function Users() {
             <tr className="bg-gray-100 text-left">
               <th className="py-2 px-4">Nombre</th>
               <th className="py-2 px-4">Correo</th>
-              <th className="py-2 px-4">Medio</th>
               <th className="py-2 px-4">Acciones</th>
             </tr>
           </thead>
@@ -164,7 +146,6 @@ function Users() {
               <tr key={user.id} className="border-t border-gray-200">
                 <td className="py-2 px-4">{user.nombre}</td>
                 <td className="py-2 px-4">{user.email}</td>
-                <td className="py-2 px-4">{user.type_name}</td>
                 <td className="py-2 px-4">
                   <button
                     className="hover:text-blue-700 mr-2"

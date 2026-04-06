@@ -99,47 +99,52 @@ class EvidenceRecordsService {
   }
 
   async getAllEvidenceRecords() {
-    const evidenceRecords = await db("evidence_records as er")
-      .leftJoin("users as u", "er.user_id", "u.id")
-      .leftJoin("review_status as rs", "er.status_id", "rs.id")
-      .leftJoin("content_formats as f", "er.format_id", "f.id")
-      .leftJoin("diffusion_orders as o", "er.order_id", "o.id")
-      .leftJoin("media_channels as mc", "o.media_channel_id", "mc.id")
-      .leftJoin("media_types as mt", "u.media_type_id", "mt.id")
+  const evidenceRecords = await db("evidence_records as er")
+    .leftJoin("users as u", "er.user_id", "u.id")
+    .leftJoin("review_status as rs", "er.status_id", "rs.id")
+    .leftJoin("content_formats as f", "er.format_id", "f.id")
+    .leftJoin("diffusion_orders as o", "er.order_id", "o.id")
+    .leftJoin("media_channels as mc", "o.media_channel_id", "mc.id")
+    .leftJoin("media_types as mt", "mc.media_type_id", "mt.id")
+    .select(
+      "er.id",
+      "er.order_id",
+      "er.program_name",
+      "er.publication_title",
+      "er.evidence_date",
+      "er.evidence_time",
+      "er.link",
+      "er.has_anomaly",
+      "er.internal_notes",
+      "er.created_at",
 
+      "u.id as user_id",
+      db.raw("CONCAT(u.nombre, ' ', u.apellidos) as user_name"),
+
+      "rs.status_name",
+      "f.format_name",
+
+      "mc.channel_name",
+      "mt.type_name"
+    )
+    .where("er.is_active", 1)
+    .orderBy("er.id", "asc");
+
+  for (let record of evidenceRecords) {
+    const anomalies = await db("evidence_anomalies as ea")
+      .join("anomaly_types as at", "ea.anomaly_type_id", "at.id")
       .select(
-        "er.id",
-        "er.order_id",
-        "er.program_name",
-        "er.publication_title",
-        "er.evidence_date",
-        "er.evidence_time",
-        "er.link",
-        "er.has_anomaly",
-        "er.internal_notes",
-        "er.created_at",
-
-        "u.id as user_id",
-        "u.media_type_id",
-        db.raw("CONCAT(u.nombre, ' ', u.apellidos) as user_name"),
-
-        "rs.id as status_id",
-        "rs.status_name",
-
-        "f.id as format_id",
-        "f.format_name",
-
-        "mc.id as channel_id",
-        "mc.channel_name",
-
-        "mt.id as media_type_id",
-        "mt.type_name",
+        "at.code as type",
+        "ea.description",
+        "ea.is_resolved"
       )
-      .where("er.is_active", 1)
-      .orderBy("er.id", "asc");
+      .where("ea.evidence_id", record.id);
 
-    return evidenceRecords;
+    record.anomalies = anomalies;
   }
+
+  return evidenceRecords;
+}
 
   async getEvidenceRecordById(id) {
     const evidenceRecord = await db("evidence_records")
@@ -182,115 +187,143 @@ class EvidenceRecordsService {
     return anomalyType.id;
   }
 
-  async createEvidenceRecord(data) {
-    const validatedData = evidenceRecordsValidator.validateCreate(data);
+  async getByAnomalies() {
+  return await db("evidence_records as er")
+    .join("evidence_anomalies as ea", "er.id", "ea.evidence_id")
+    .join("anomaly_types as at", "ea.anomaly_type_id", "at.id")
 
-    const order = await db("diffusion_orders as do")
-      .join("media_channels as mc", "do.media_channel_id", "mc.id")
-      .select("do.id", "do.total_spots_ordered", "mc.media_type_id")
-      .where("do.id", validatedData.order_id)
-      .first();
+    .leftJoin("review_status as rs", "er.status_id", "rs.id")
+    .leftJoin("content_formats as f", "er.format_id", "f.id")
+    .leftJoin("diffusion_orders as o", "er.order_id", "o.id")
+    .leftJoin("media_channels as mc", "o.media_channel_id", "mc.id")
+    .leftJoin("media_types as mt", "mc.media_type_id", "mt.id")
 
-    if (!order) {
-      throw new ValidationError("Orden no válida");
-    }
+    .select(
+      "er.id",
+      "er.order_id",
+      "er.evidence_date",
+      "er.evidence_time",
+      "er.has_anomaly",
+      "rs.status_name",
+      "f.format_name",
+      "mc.channel_name",
+      "mt.type_name",
 
-    const user = await db("users")
-      .select("id", "media_type_id")
-      .where("id", validatedData.user_id)
-      .first();
+      "ea.id as anomaly_id",
+      "ea.description as anomaly_description",
+      "ea.detected_at",
+      "ea.is_resolved",
 
-    if (!user) {
-      throw new ValidationError("Usuario no válido");
-    }
+      "at.code as anomaly_code",
+      "at.description as anomaly_type"
+    )
+    .where("er.is_active", 1)
+    .orderBy("er.id", "asc");
+}
 
-    if (user.media_type_id !== order.media_type_id) {
-      throw new ValidationError(
-        "El usuario no pertenece al tipo de medio de esta orden",
-      );
-    }
+async createEvidenceRecord(data) {
+  const validatedData = evidenceRecordsValidator.validateCreate(data);
 
-    await db.transaction(async (trx) => {
-      let hasAnomaly = false;
+  const order = await db("diffusion_orders as do")
+    .join("media_channels as mc", "do.media_channel_id", "mc.id")
+    .select("do.id", "do.total_spots_ordered", "mc.media_type_id")
+    .where("do.id", validatedData.order_id)
+    .first();
 
-      const [{ count }] = await trx("evidence_records")
-        .where("order_id", validatedData.order_id)
-        .andWhere("is_active", 1)
-        .count("id as count");
+  if (!order) {
+    throw new ValidationError("Orden no válida");
+  }
 
-      const nextCount = Number(count) + 1;
+  await db.transaction(async (trx) => {
+    let hasAnomaly = false;
 
-      const [evidenceId] = await trx("evidence_records").insert({
-        ...validatedData,
-        has_anomaly: 0,
-      });
+    const [{ count }] = await trx("evidence_records")
+      .where("order_id", validatedData.order_id)
+      .andWhere("is_active", 1)
+      .count("id as count");
 
-      if (nextCount > order.total_spots_ordered) {
-        hasAnomaly = true;
+    const nextCount = Number(count) + 1;
 
-        const anomalyTypeId = await this.getAnomalyTypeId(trx, "EXTRA_SPOT");
 
-        await trx("evidence_anomalies").insert({
-          evidence_id: evidenceId,
-          anomaly_type_id: anomalyTypeId,
-          description: `Spot ${nextCount}/${order.total_spots_ordered}`,
-        });
-      }
+    const localDateTime = new Date(
+      `${validatedData.evidence_date}T${validatedData.evidence_time}:00`
+    );
 
-      const duplicate = await trx("evidence_records")
-        .where({
-          order_id: validatedData.order_id,
-          evidence_date: validatedData.evidence_date,
-          evidence_time: validatedData.evidence_time,
-          is_active: 1,
-        })
-        .andWhere("id", "!=", evidenceId)
-        .first();
+    const utcDate = new Date(
+      localDateTime.getTime() - (localDateTime.getTimezoneOffset() * 60000)
+    );
 
-      if (duplicate) {
-        hasAnomaly = true;
+    const utcDateStr = utcDate.toISOString().slice(0, 10);
+    const utcTimeStr = utcDate.toISOString().slice(11, 19);
 
-        const anomalyTypeId = await this.getAnomalyTypeId(
-          trx,
-          "DUPLICATE_EVIDENCE",
-        );
-
-        await trx("evidence_anomalies").insert({
-          evidence_id: evidenceId,
-          anomaly_type_id: anomalyTypeId,
-          description: "Evidencia duplicada (fecha y hora repetidas)",
-        });
-      }
-
-      const now = new Date();
-      const evidenceDateTime = new Date(
-        `${validatedData.evidence_date}T${validatedData.evidence_time}:00`,
-      );
-
-      const diffMinutes = Math.abs((now - evidenceDateTime) / 60000);
-      const TOLERANCE_MINUTES = 10;
-
-      if (diffMinutes > TOLERANCE_MINUTES) {
-        hasAnomaly = true;
-
-        const anomalyTypeId = await this.getAnomalyTypeId(trx, "TIME_EXCEEDED");
-
-        await trx("evidence_anomalies").insert({
-          evidence_id: evidenceId,
-          anomaly_type_id: anomalyTypeId,
-          description: `Diferencia de ${Math.round(diffMinutes)} minutos`,
-        });
-      }
-
-      if (hasAnomaly) {
-        await trx("evidence_records")
-          .where("id", evidenceId)
-          .update({ has_anomaly: 1 });
-      }
+    const [evidenceId] = await trx("evidence_records").insert({
+      ...validatedData,
+      evidence_date: utcDateStr,
+      evidence_time: utcTimeStr,
+      has_anomaly: 0,
     });
 
-    return { success: true };
-  }
+
+    if (nextCount > order.total_spots_ordered) {
+      hasAnomaly = true;
+
+      const anomalyTypeId = await this.getAnomalyTypeId(trx, "EXTRA_SPOT");
+
+      await trx("evidence_anomalies").insert({
+        evidence_id: evidenceId,
+        anomaly_type_id: anomalyTypeId,
+        description: `Spot ${nextCount}/${order.total_spots_ordered}`,
+      });
+    }
+    const duplicate = await trx("evidence_records")
+      .where({
+        order_id: validatedData.order_id,
+        evidence_date: utcDateStr,
+        evidence_time: utcTimeStr,
+        is_active: 1,
+      })
+      .andWhere("id", "!=", evidenceId)
+      .first();
+
+    if (duplicate) {
+      hasAnomaly = true;
+
+      const anomalyTypeId = await this.getAnomalyTypeId(
+        trx,
+        "DUPLICATE_EVIDENCE"
+      );
+
+      await trx("evidence_anomalies").insert({
+        evidence_id: evidenceId,
+        anomaly_type_id: anomalyTypeId,
+        description: "Evidencia duplicada (fecha y hora repetidas)",
+      });
+    }
+    const now = new Date();
+    const diffMinutes = Math.abs((now - utcDate) / 60000);
+    const TOLERANCE_MINUTES = 10;
+
+    if (diffMinutes > TOLERANCE_MINUTES) {
+      hasAnomaly = true;
+
+      const anomalyTypeId = await this.getAnomalyTypeId(trx, "TIME_EXCEEDED");
+
+      await trx("evidence_anomalies").insert({
+        evidence_id: evidenceId,
+        anomaly_type_id: anomalyTypeId,
+        description: `Diferencia de ${Math.round(diffMinutes)} minutos`,
+      });
+    }
+
+    if (hasAnomaly) {
+      await trx("evidence_records")
+        .where("id", evidenceId)
+        .update({ has_anomaly: 1 });
+    }
+  });
+
+  return { success: true };
+}
 
   async updateEvidenceRecord(id, data) {
     await this.getEvidenceRecordById(id);

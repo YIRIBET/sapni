@@ -12,15 +12,26 @@ class EvidenceRecordsController {
         }
     }
 
-    async getById(req, res, next) {
-        try {
-            const { id } = req.params;
-            const evidenceRecord = await evidenceRecordsService.getEvidenceRecordById(id);
-            sendSuccess(res, evidenceRecord, "Registro de evidencia obtenido exitosamente");
-        } catch (error) {
-            next(error);
-        }
-    }
+async getById(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const evidenceRecord =
+      await evidenceRecordsService.getEvidenceRecordById(id);
+    const anomalies =
+      await evidenceRecordsService.getAnomaliesByEvidenceId(id);
+
+    evidenceRecord.anomalies = anomalies;
+
+    sendSuccess(
+      res,
+      evidenceRecord,
+      "Registro de evidencia obtenido exitosamente"
+    );
+  } catch (error) {
+    next(error);
+  }
+}
 
     async getByCampaignId(req, res, next) {
         try {
@@ -99,13 +110,9 @@ async create(req, res, next) {
       201
     );
   } catch (error) {
-
-    // 🛑 Errores esperados para el usuario
     if (error.name === "ValidationError") {
       return sendError(res, error.message, 400);
     }
-
-    // 🔥 Errores inesperados
     next(error);
   }
 }

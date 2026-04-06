@@ -136,7 +136,7 @@ class campaignsService {
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const isActive = data.end_date >= today ? 1 : 0;
+    const isActive = new Date(data.end_date) >= new Date(today) ? 1 : 0;
 
     await db("campaigns").where({ id }).update({
       campaign_name: data.campaign_name,

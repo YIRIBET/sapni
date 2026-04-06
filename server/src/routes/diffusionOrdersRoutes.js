@@ -7,7 +7,7 @@ const { authorize } = require("../middlewares/requireMedia");
 
 const router = express.Router();
 
-router.get("/media-type/:media_type_id", diffusionOrdersController.getOrdersByMediaType);
+router.get('/active', diffusionOrdersController.getAllOrdersbyCampaignActive);
 
 router.use(authenticate, authorize(['Super Admin']));
 

@@ -16,7 +16,6 @@ const getValidationSchema = (isEdit) =>
       : Yup.string()
           .min(6, "Mínimo 6 caracteres")
           .required("La contraseña es obligatoria"),
-    media_type_id: Yup.string().required("Selecciona un medio"),
   });
 
 const UsersModal = ({ user, onClose, onSuccess }) => {
@@ -27,7 +26,6 @@ const UsersModal = ({ user, onClose, onSuccess }) => {
     apellidos: user?.apellidos || "",
     email: user?.email || "",
     password: "",
-    media_type_id: user?.media_type_id || "",
   };
 
   const handleSubmit = async (values) => {
@@ -112,21 +110,7 @@ const UsersModal = ({ user, onClose, onSuccess }) => {
                 </div>
               </div>
 
-              <div>
-                <Field
-                  as="select"
-                  name="media_type_id"
-                  className={inputClass(errors.media_type_id, touched.media_type_id)}
-                >
-                  <option value="">Selecciona un medio</option>
-                  <option value="1">Radio</option>
-                  <option value="2">Redes Sociales</option>
-                  <option value="3">TV</option>
-                  <option value="4">Periódico</option>
-                  <option value="5">Otro</option>
-                </Field>
-                <ErrorMessage name="media_type_id" component="p" className="text-red-500 text-sm" />
-              </div>
+              {/* ❌ Eliminado el select de media_type_id */}
 
               <div>
                 <Field
