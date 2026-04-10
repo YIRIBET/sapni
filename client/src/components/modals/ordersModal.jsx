@@ -8,7 +8,6 @@ import Swal from "sweetalert2";
 
 const validationSchema = Yup.object({
   campaign_id: Yup.string().required("Selecciona una campaña"),
-  media_channel_id: Yup.string().required("Selecciona un canal de difusión"),
   total_spots_ordered: Yup.number()
     .typeError("Debe ser un número")
     .min(1, "Mínimo 1 spot")
@@ -22,17 +21,15 @@ const validationSchema = Yup.object({
 const OrderModal = ({ order, onClose, onSuccess }) => {
   const isEdit = Boolean(order);
   const [campaigns, setCampaigns] = useState([]);
-  const [mediaChannels, setMediaChannels] = useState([]);
+ 
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [campaignData, mediaData] = await Promise.all([
+        const [campaignData] = await Promise.all([
           fetchCampaingsActive(),
-          fetchChannels(),
         ]);
         setCampaigns(Array.isArray(campaignData) ? campaignData : campaignData.data);
-        setMediaChannels(Array.isArray(mediaData) ? mediaData : mediaData.data);
       } catch (error) {
         console.error("Error loading data:", error);
       }
@@ -42,7 +39,6 @@ const OrderModal = ({ order, onClose, onSuccess }) => {
 
   const initialValues = {
     campaign_id: order?.campaign_id || "",
-    media_channel_id: order?.media_channel_id || "",
     total_spots_ordered: order?.total_spots_ordered || "",
     contract_amount: order?.contract_amount || "",
   };
@@ -50,7 +46,6 @@ const OrderModal = ({ order, onClose, onSuccess }) => {
   const handleSubmit = async (values) => {
     const payload = {
       campaign_id: Number(values.campaign_id),
-      media_channel_id: Number(values.media_channel_id),
       total_spots_ordered: Number(values.total_spots_ordered),
       contract_amount: String(values.contract_amount),
     };
@@ -131,23 +126,6 @@ const OrderModal = ({ order, onClose, onSuccess }) => {
                 </Field>
                 <ErrorMessage name="campaign_id" component="p" className="text-red-500 text-sm mt-1" />
               </div>
-
-              <div>
-                <Field
-                  as="select"
-                  name="media_channel_id"
-                  className={inputClass(errors.media_channel_id, touched.media_channel_id)}
-                >
-                  <option value="">Selecciona un canal de difusión</option>
-                  {mediaChannels.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.channel_name}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage name="media_channel_id" component="p" className="text-red-500 text-sm mt-1" />
-              </div>
-
               <div className="flex gap-4">
                 <div className="w-1/2">
                   <Field

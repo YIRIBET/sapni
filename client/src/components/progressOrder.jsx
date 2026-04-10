@@ -79,7 +79,6 @@ function OrderProgress() {
             className="bg-gray-100 rounded-md pl-10 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <span className="text-sm text-gray-500">{filtered.length} órdenes</span>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 space-y-5">

@@ -2,7 +2,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export async function fetchEvidence() {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${API_URL}/evidence-records`, {
+  const res = await fetch(`${API_URL}/evidence-records/`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -110,6 +110,36 @@ export async function fetchProgressByOrder() {
 
   if (!res.ok) throw new Error("Failed to fetch order progress");
 
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function fetchCountsByMonth() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/evidence-records/stats/by-month`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch monthly counts");
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function fetchCountsByMediaTypePerMonth() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/evidence-records/stats/by-media-type-month`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch media type monthly counts");
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function fetchProgressByMonth() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/evidence-records/stats/progress-by-month`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch monthly progress");
   const json = await res.json();
   return json.data || [];
 }

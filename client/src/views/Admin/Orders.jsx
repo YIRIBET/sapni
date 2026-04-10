@@ -166,7 +166,6 @@ function Orders() {
               <tr className="bg-gray-100 text-left">
                 <th className="py-2 px-4">ID</th>
                 <th className="py-2 px-4">Campaña</th>
-                <th className="py-2 px-4">Canal de difusión</th>
                 <th className="py-2 px-4">Spots</th>
                 <th className="py-2 px-4">Costo</th>
                 <th className="py-2 px-4">Estado</th>
@@ -179,7 +178,6 @@ function Orders() {
                 <tr key={order.id} className="border-t border-gray-200">
                   <td className="py-2 px-4">{order.id}</td>
                   <td className="py-2 px-4">{order.campaign_name}</td>
-                  <td className="py-2 px-4">{order.channel_name}</td>
                   <td className="py-2 px-4">{order.total_spots_ordered}</td>
                   <td className="py-2 px-4">
                     $

@@ -7,9 +7,9 @@ import Swal from "sweetalert2";
 const MEDIA_TYPES = [
   { value: "1", label: "Radio" },
   { value: "2", label: "Redes Sociales" },
-  { value: "3", label: "Website" },
-  { value: "4", label: "TV" },
-  { value: "5", label: "Periódico" },
+  { value: "3", label: "TV" },
+  { value: "4", label: "Periodico" },
+  { value: "5", label: "Otro" },
 ];
 
 const getValidationSchema = (mediaTypeId) =>

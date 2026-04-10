@@ -4,7 +4,6 @@ const create = joi.object({
     total_spots_ordered: joi.number().integer().positive().required(),
     contract_amount: joi.string().max(100).required(),
     campaign_id: joi.number().integer().positive().required(),
-    media_channel_id: joi.number().integer().positive().required()
 });
 
 const update = joi
@@ -12,7 +11,6 @@ const update = joi
         total_spots_ordered: joi.number().integer().positive(),
         contract_amount: joi.string().max(100),
         campaign_id: joi.number().integer().positive(),
-        media_channel_id: joi.number().integer().positive()
     })
     .min(1);
 

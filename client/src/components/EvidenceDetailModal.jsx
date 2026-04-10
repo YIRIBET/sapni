@@ -69,7 +69,6 @@ const EvidenceDetailModal = ({ isOpen, onClose, evidence }) => {
               <Item label="Spots ordenados" value={order.total_spots_ordered} />
               <Item label="Campaña" value={order.campaign_name} />
               <Item label="Contrato" value={order.contract_amount} />
-              <Item label="Medio contratado" value={order.channel_name} />
             </div>
           ) : (
             <p className="text-xs text-gray-400">Orden no disponible</p>

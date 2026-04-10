@@ -7,9 +7,10 @@ const { authorize } = require("../middlewares/requireMedia");
 
 const router = express.Router();
 
+router.get('/', mediaChannelsController.getAll);
+
 router.use(authenticate, authorize(['Super Admin']));
 
-router.get('/', mediaChannelsController.getAll);
 router.get('/:id', validateRequest(idParamSchema, 'params'), mediaChannelsController.getById);
 router.post('/', validateRequest(create), mediaChannelsController.create);
 router.put('/:id', validateRequest(idParamSchema, 'params'), validateRequest(update), mediaChannelsController.update);

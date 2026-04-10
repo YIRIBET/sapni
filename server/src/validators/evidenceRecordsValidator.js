@@ -4,6 +4,7 @@ const { ValidationError } = require("../utils/errors");
 const create = joi.object({
   order_id: joi.number().integer().positive().required(),
   user_id: joi.number().integer().positive().required(),
+  media_channel_id: joi.number().integer().positive().required(),
   format_id: joi.number().integer().positive().required(),
   status_id: joi.number().integer().positive().required(),
 
@@ -55,19 +56,6 @@ const create = joi.object({
 
 module.exports = { create };
 
-
-const update = joi.object({
-  order_id: joi.number().integer().positive(),
-  user_id: joi.number().integer().positive(),
-  format_id: joi.number().integer().positive(),
-  status_id: joi.number().integer().positive(),
-  program_name: joi.string().max(255),
-  publication_title: joi.string().max(255),
-  evidence_date: joi.date().iso(),
-  evidence_time: joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/),
-  link: joi.string().uri().allow(null, ""),
-  internal_notes: joi.string().max(500).allow(null, ""),
-});
 
 const idParamSchema = joi.object({
   id: joi.number().integer().positive().required(),

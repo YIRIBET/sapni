@@ -1,3 +1,4 @@
+process.env.TZ = 'America/Mexico_City';
 require('dotenv').config();
 const app = require('./app');
 const db = require('./config/database');
